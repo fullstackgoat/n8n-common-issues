@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Top 10 Issues You Will Triage — n8n Senior Support Engineer</title>
+<style>
+  :root {
+    --ink:        #1c1a17;
+    --ink-soft:   #4a443d;
+    --ink-faint:  #7a7368;
+    --rule:       #e7e2da;
+    --paper:      #f6f1e8;
+    --paper-2:    #efe7d8;
+    --accent:     #b14b2c;
+    --accent-2:   #6c7a3a;
+    --tag-bg:     #ece4d3;
+    --shadow:     0 1px 0 rgba(28,26,23,0.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Charter', 'Georgia', 'Times New Roman', serif;
+    line-height: 1.55;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono, code, kbd, .meta, .badge, .tag, .nav, .table th {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--accent); color: var(--accent); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 56px 28px 96px; }
+
+  /* nav */
+  .nav { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); border-bottom: 1px solid var(--rule); padding-bottom: 18px; margin-bottom: 56px; }
+  .nav strong { color: var(--ink); letter-spacing: 0.18em; }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1fr; gap: 28px; margin-bottom: 64px; }
+  .eyebrow { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.05; margin: 0 0 24px; letter-spacing: -0.01em; font-weight: 700; }
+  .lede { font-size: 20px; color: var(--ink-soft); max-width: 70ch; }
+  .lede strong { color: var(--ink); }
+
+  /* meta strip */
+  .meta-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin: 48px 0 56px; }
+  .meta-strip > div { padding: 18px 24px 18px 0; border-right: 1px solid var(--rule); }
+  .meta-strip > div:last-child { border-right: none; padding-right: 0; }
+  .meta-label { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .meta-value { font-size: 22px; font-weight: 700; }
+
+  /* sections */
+  h2 { font-size: 28px; letter-spacing: -0.005em; margin: 72px 0 8px; }
+  .section-rule { color: var(--ink-faint); font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 56px; }
+
+  /* methodology bento */
+  .bento { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 24px 0 56px; }
+  .bento > div { background: var(--paper); padding: 22px 22px 26px; }
+  .bento h3 { font-size: 14px; font-family: ui-monospace, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 12px; font-weight: 600; }
+  .bento p { margin: 0; font-size: 15.5px; color: var(--ink-soft); }
+
+  /* JD anchor */
+  .jd { background: var(--paper-2); border: 1px solid var(--rule); padding: 22px 26px; margin: 16px 0 0; }
+  .jd ul { margin: 8px 0 0 0; padding-left: 20px; }
+  .jd li { margin: 4px 0; color: var(--ink-soft); }
+  .jd li::marker { color: var(--accent); }
+
+  /* issue cards */
+  .issues { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--rule); margin-top: 16px; }
+  .issue { display: grid; grid-template-columns: 80px 1fr; gap: 28px; padding: 36px 0; border-bottom: 1px solid var(--rule); }
+  .issue .num { font-family: ui-monospace, monospace; font-size: 48px; font-weight: 700; color: var(--accent); line-height: 1; padding-top: 4px; }
+  .issue h3 { font-size: 26px; line-height: 1.2; margin: 0 0 14px; letter-spacing: -0.005em; }
+  .issue .signal { display: inline-flex; align-items: center; gap: 10px; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 18px; }
+  .issue .signal .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); }
+  .issue .signal .dot.high { background: var(--accent); }
+  .issue .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 14px; }
+  .issue h4 { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; font-weight: 600; }
+  .issue p { margin: 0 0 8px; color: var(--ink-soft); font-size: 16px; }
+  .issue ul { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 15px; }
+  .issue ul li { margin: 4px 0; }
+  .issue .evidence { font-size: 14.5px; }
+  .issue .evidence a { display: block; margin: 4px 0; color: var(--ink-soft); }
+  .issue .views { color: var(--ink-faint); font-family: ui-monospace, monospace; font-size: 12px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag { background: var(--tag-bg); color: var(--ink-soft); padding: 4px 10px; border-radius: 2px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* table */
+  .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  .table th, .table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-size: 14px; vertical-align: top; }
+  .table th { color: var(--ink-faint); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .table td.first { font-weight: 600; color: var(--ink); }
+  .check { color: var(--accent-2); font-weight: 700; }
+
+  /* footer */
+  footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--ink-faint); font-size: 13px; }
+
+  @media (max-width: 740px) {
+    .meta-strip { grid-template-columns: repeat(2, 1fr); }
+    .meta-strip > div { border-right: none; border-bottom: 1px solid var(--rule); }
+    .bento { grid-template-columns: 1fr; }
+    .issue { grid-template-columns: 1fr; gap: 12px; }
+    .issue .grid { grid-template-columns: 1fr; }
+    .issue .num { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="nav">
+    <span><strong>Field Report</strong> &nbsp;·&nbsp; community.n8n.io</span>
+    <span>v1 · May 2026</span>
+  </div>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Senior Support Engineer · Application Brief</div>
+      <h1>The 10 issues you will triage in your first 90 days at&nbsp;n8n.</h1>
+      <p class="lede">
+        Findings from a fresh scrape of <a href="https://community.n8n.io/">community.n8n.io</a> &mdash; covering the latest <em>Questions</em>, the all-time top <em>Questions</em>, top <em>Help me Build my Workflow</em>, top <em>Feature Requests</em>, and the <span class="mono">queue-mode</span>, <span class="mono">docker</span>, <span class="mono">webhook</span>, and <span class="mono">rag</span> tags.
+        Every issue below maps directly to a JD requirement and is supported by real, linked threads &mdash; <strong>each one is a future ticket waiting to be solved.</strong>
+      </p>
+    </div>
+  </header>
+
+  <div class="meta-strip">
+    <div>
+      <div class="meta-label">Threads sampled</div>
+      <div class="meta-value">~210</div>
+    </div>
+    <div>
+      <div class="meta-label">Top thread views</div>
+      <div class="meta-value">91.6k</div>
+    </div>
+    <div>
+      <div class="meta-label">JD bullets covered</div>
+      <div class="meta-value">100%</div>
+    </div>
+    <div>
+      <div class="meta-label">Date</div>
+      <div class="meta-value">May 2026</div>
+    </div>
+  </div>
+
+  <div class="section-rule">01 &nbsp;/&nbsp; Methodology</div>
+  <h2>How the list was built</h2>
+
+  <div class="bento">
+    <div>
+      <h3>Sources</h3>
+      <p>Latest &amp; All-Time Top in <em>Questions</em>, top of <em>Help me Build my Workflow</em>, top <em>Feature Requests</em>, plus deep-dive scrapes of the <span class="mono">queue-mode</span>, <span class="mono">docker</span>, <span class="mono">webhook</span>, and <span class="mono">rag</span> tag pages.</p>
+    </div>
+    <div>
+      <h3>Ranking signal</h3>
+      <p>Issues are weighted by <strong>thread count × views × replies</strong>, then filtered through a Senior Support Engineer lens: things that arrive as tickets, are reproducible, and are KB-able.</p>
+    </div>
+    <div>
+      <h3>JD alignment</h3>
+      <p>Every cluster maps to one of the JD's seven core skills (APIs, webhooks, auth, networking, JS/Node, Docker, troubleshooting). Coverage is shown in the matrix at the bottom of the page.</p>
+    </div>
+  </div>
+
+  <div class="jd">
+    <strong style="font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);">Job description requirements anchored in this report</strong>
+    <ul>
+      <li>Diagnose and troubleshoot issues related to n8n workflows, integrations, and performance</li>
+      <li>Investigate and reproduce complex technical issues across the n8n ecosystem</li>
+      <li>Debugging APIs, integrations, webhooks, and authentication flows</li>
+      <li>Solid understanding of networking fundamentals (DNS, HTTP/HTTPS, TCP/IP)</li>
+      <li>Experience with JavaScript, Node.js, Docker, and containerized environments</li>
+      <li>Identify recurring issues and propose improvements to product reliability</li>
+      <li>Create and maintain documentation, FAQs, and knowledge base articles</li>
+    </ul>
+  </div>
+
+  <div class="section-rule">02 &nbsp;/&nbsp; The Top 10</div>
+  <h2>Ranked by ticket volume × business impact</h2>
+
+  <div class="issues">
+
+    <!-- 1 -->
+    <article class="issue">
+      <div class="num">01</div>
+      <div>
+        <h3>Webhook URL &amp; "Connection lost" — the self-hosting onboarding wall</h3>
+        <div class="signal"><span class="dot high"></span>Frequency: very high · Severity: blocking · 100k+ aggregate views</div>
+        <p>The single biggest support pattern. Users self-host n8n, fail to set <span class="mono">N8N_HOST</span> / <span class="mono">WEBHOOK_URL</span> / <span class="mono">N8N_PROTOCOL</span>, then hit a chain of symptoms: webhooks stuck on <span class="mono">localhost:5678</span>, OAuth callbacks failing, "Connection lost" banner, websocket drops behind reverse proxies. Often compounded by Cloudflare/ngrok/nginx misconfigurations.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Missing or wrong <span class="mono">WEBHOOK_URL</span> env var</li>
+              <li>Reverse proxy not forwarding <span class="mono">Upgrade</span>/<span class="mono">Connection</span> headers</li>
+              <li><span class="mono">N8N_PROXY_HOPS</span> not set behind multiple proxies</li>
+              <li>HTTPS termination mismatch between proxy and n8n</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/how-to-change-localhost-5678-from-webhook-url/27033">How to change localhost:5678 from webhook url? <span class="views">— 39.2k views</span></a>
+              <a href="https://community.n8n.io/t/connection-lost-you-have-a-connection-issue-or-the-server-is-down-n8n-should-reconnect-automatically-once-the-issue-is-resolved/80999">Connection lost / server down banner <span class="views">— 40.8k views</span></a>
+              <a href="https://community.n8n.io/t/connection-lost/1471">Connection lost (legacy) <span class="views">— 21.8k views</span></a>
+              <a href="https://community.n8n.io/t/nginx-configuration/111">Nginx configuration <span class="views">— 28.9k views</span></a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">webhook</span><span class="tag">deployment</span><span class="tag">networking</span><span class="tag">reverse-proxy</span></div>
+      </div>
+    </article>
+
+    <!-- 2 -->
+    <article class="issue">
+      <div class="num">02</div>
+      <div>
+        <h3>OAuth 2.0 credential failures (Google, Microsoft, custom)</h3>
+        <div class="signal"><span class="dot high"></span>Frequency: very high · Severity: blocks integrations · 50k+ aggregate views</div>
+        <p>Auth is the second-largest pattern, and it's a direct JD core requirement. Users hit callback-URL mismatches, refresh-token expiry on Google/Microsoft, the Public-API "allowedDomains" contradiction, ngrok loop-back failures, and "Could not connect to your MCP server" SSE auth errors. These tickets need a methodical request-trace to resolve.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Callback URL points to <span class="mono">localhost:5678</span> in self-hosted</li>
+              <li>OAuth client misconfigured (scopes, consent screen, app-mode)</li>
+              <li>Token refresh failing silently — provider revoked or user reset</li>
+              <li><span class="mono">allowedDomains</span> rules conflicting via Public API</li>
+              <li>ngrok URL not added to OAuth client allow-list</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/oauth-callback-url-is-localhost-5678/2867">OAuth callback URL is localhost:5678 <span class="views">— 34.6k views</span></a>
+              <a href="https://community.n8n.io/t/google-calendar-oauth2-api-token-expiring-every-once-in-a-while/11336">Google Calendar OAuth2 token expiring <span class="views">— 9.5k views</span></a>
+              <a href="https://community.n8n.io/t/error-403-using-oauth-credential-from-google/3848">Error 403 using OAuth Credential from Google <span class="views">— 5.9k views</span></a>
+              <a href="https://community.n8n.io/t/issue-with-updating-credentials-via-public-api-contradictory-alloweddomains-errors/293219">Public API "allowedDomains" errors</a>
+              <a href="https://community.n8n.io/t/inoreader-oauth2-integration-fails-with-self-hosted-n8n-ngrok/253489">Inoreader OAuth2 + ngrok</a>
+              <a href="https://community.n8n.io/t/error-could-not-connect-to-your-mcp-server-when-integrating-external-tool-via-sse-in-ai-agent/100957">"Could not connect to your MCP server" SSE <span class="views">— 15.4k views</span></a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">oauth2</span><span class="tag">credentials</span><span class="tag">authentication</span><span class="tag">jwt</span></div>
+      </div>
+    </article>
+
+    <!-- 3 -->
+    <article class="issue">
+      <div class="num">03</div>
+      <div>
+        <h3>Docker self-hosting: persistence, permissions, upgrades, migration</h3>
+        <div class="signal"><span class="dot high"></span>Frequency: very high · Severity: data-loss risk · 30k+ aggregate views</div>
+        <p>Direct hit on the JD's "Docker or containerized environments" core requirement. Tickets cluster around: <em>I lost my credentials after a restart</em>, <em>file is not writable</em>, <em>SQLite corrupted, how do I migrate to Postgres</em>, <em>how do I upgrade docker-compose safely</em>, and <em>n8n isn't reachable from another computer</em>.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Volume not mounted, or mounted to host path with wrong UID/GID</li>
+              <li>Encryption key lost between container restarts → credentials unreadable</li>
+              <li>SQLite chosen for production — corrupts under concurrency</li>
+              <li>Upgrade procedure run without backing up <span class="mono">.n8n</span></li>
+              <li>Container bound to <span class="mono">127.0.0.1</span> instead of <span class="mono">0.0.0.0</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/how-to-upgrade-n8n-with-docker-compose-setup/660">How to upgrade n8n with docker-compose <span class="views">— 25k views</span></a>
+              <a href="https://community.n8n.io/t/how-to-migrate-from-sqlite-to-postgresql/2170">SQLite → PostgreSQL migration <span class="views">— 15.4k views</span></a>
+              <a href="https://community.n8n.io/t/credentials-lost-after-docker-restart/226303">Credentials lost after Docker restart</a>
+              <a href="https://community.n8n.io/t/read-write-files-from-disk-the-file-x-is-not-writable/267765">File "x" is not writable <span class="views">— 1.2k views</span></a>
+              <a href="https://community.n8n.io/t/urgent-docker-hosted-n8n-on-sqlite-crashed-possible-db-corruption-looking-for-paid-expert-to-recover-data-and-migrate-to-postgres/257163">SQLite crash — paid recovery</a>
+              <a href="https://community.n8n.io/t/docker-image-suggestion-add-healthcheck/31837">Docker healthcheck request <span class="views">— 3.1k views</span></a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">docker</span><span class="tag">postgres</span><span class="tag">sqlite</span><span class="tag">deployment</span><span class="tag">data-loss</span></div>
+      </div>
+    </article>
+
+    <!-- 4 -->
+    <article class="issue">
+      <div class="num">04</div>
+      <div>
+        <h3>Queue mode &amp; worker scaling regressions</h3>
+        <div class="signal"><span class="dot high"></span>Frequency: high · Severity: production-impact · IC3 differentiator</div>
+        <p>The hardest cluster — and the one IC3 hires are expected to own. Race conditions in v2.x queue mode, ghost cron triggers firing N times across N workers, "Worker failed to find data for execution" errors, UI failing to render in queue mode, Redis connection drops on Cloud Run / DigitalOcean, and Postgres-node failures inside workers.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Cron trigger registered on every worker instead of only main</li>
+              <li>Race between Redis-published job and binary-data write to disk</li>
+              <li>Misconfigured <span class="mono">EXECUTIONS_MODE=queue</span> with main process also picking jobs</li>
+              <li>Redis connection limits / sentinel/cluster not supported</li>
+              <li>Worker concurrency too high for memory budget</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/cron-trigger-executing-multiple-times-after-updates-due-to-ghost-triggers-in-queue-mode-with-multiple-workers/244687">Cron ghost triggers in queue mode</a>
+              <a href="https://community.n8n.io/t/v2-2-4-worker-failed-to-find-data-for-execution-race-condition-in-queue-mode-not-present-in-v1-x/246815">v2.2.4 Worker race condition</a>
+              <a href="https://community.n8n.io/t/ui-wont-render-in-queue-mode/192160">UI won't render in queue mode</a>
+              <a href="https://community.n8n.io/t/redis-and-broker-connection-issues-in-n8n-queue-mode-cloud-run-deployment/176093">Redis broker issues on Cloud Run</a>
+              <a href="https://community.n8n.io/t/postgres-node-fails-in-queue-mode-cannot-read-properties-of-undefined-reading-execute/111744">Postgres node fails in queue mode</a>
+              <a href="https://community.n8n.io/t/high-usage-of-ram-in-queue-mode-no-reset/63141">High RAM in queue mode</a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">queue-mode</span><span class="tag">redis</span><span class="tag">scaling</span><span class="tag">node.js</span><span class="tag">production</span></div>
+      </div>
+    </article>
+
+    <!-- 5 -->
+    <article class="issue">
+      <div class="num">05</div>
+      <div>
+        <h3>Webhook delivery, idempotency &amp; the "double trigger" problem</h3>
+        <div class="signal"><span class="dot high"></span>Frequency: high · Severity: data-correctness · Direct JD core</div>
+        <p>Webhooks &amp; triggers misfiring is the most "Slack-channel-on-fire" category. Symptoms: WhatsApp Cloud API webhook delays of minutes-to-hours, Gmail Search re-firing after success, Slack approval flows triggering twice, Google Apps Script intermittent 403s, idempotency &amp; checkpointing gaps when a workflow partially executes.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>No deduplication key on webhook payloads</li>
+              <li>Provider retries on a 5xx because n8n didn't respond fast enough</li>
+              <li>Cron + manual trigger both active during testing</li>
+              <li>Workflow not idempotent → side effects double on retry</li>
+              <li>Test vs. Production webhook URL confusion</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/whatsapp-cloud-api-webhooks-delayed-by-minutes-to-hours/265580">WhatsApp Cloud API webhooks delayed <span class="views">— 711 views</span></a>
+              <a href="https://community.n8n.io/t/the-n8n-double-trigger-problem-what-i-learned-building-a-slack-approval-flow/283332">The "double trigger" problem (Slack)</a>
+              <a href="https://community.n8n.io/t/workflow-re-triggers-gmail-search-node-after-successful-completion/293235">Workflow re-triggers Gmail Search after success</a>
+              <a href="https://community.n8n.io/t/n8n-workflow-fails-to-resume-safely-after-partial-execution-idempotency-checkpointing-issue/293072">Idempotency &amp; checkpointing issue</a>
+              <a href="https://community.n8n.io/t/intermittent-403-forbidden-error-from-google-apps-script-to-webhook/276370">Intermittent 403 from Google Apps Script</a>
+              <a href="https://community.n8n.io/t/webhook-production-url-only-working-in-test/80228">Webhook production URL only working in test</a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">webhook</span><span class="tag">idempotency</span><span class="tag">retry</span><span class="tag">trigger</span></div>
+      </div>
+    </article>
+
+    <!-- 6 -->
+    <article class="issue">
+      <div class="num">06</div>
+      <div>
+        <h3>AI Agent / RAG production failures</h3>
+        <div class="signal"><span class="dot high"></span>Frequency: high &amp; rising · Severity: feature-blocking · Fastest-growing category</div>
+        <p>n8n is positioning as <em>"the AI orchestration of your wildest imagination"</em> — and the forum reflects it. The recurring tickets: AI Agent latency at 16s+, embeddings node silently not calling OpenAI, vector dimension mismatches, Supabase Vector Store returning empty arrays, "Received tool input did not match expected schema," and MCP/SSE connection failures.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Embedding model dimension ≠ vector store column dimension</li>
+              <li>Document loader / splitter producing fragmented context</li>
+              <li>Tool schema doesn't match the LLM's output JSON</li>
+              <li>SSE/MCP transport blocked by reverse proxy buffering</li>
+              <li>Token budgets / context window exceeded silently</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/is-the-ai-agent-node-too-slow-for-production-rag-seeing-16s-response-times/287840">AI Agent too slow for production RAG (16s+)</a>
+              <a href="https://community.n8n.io/t/n8n-vector-store-retrieves-correctly-but-embeddings-openai-node-never-seems-to-call-the-openai-api-during-fresh-document-inserts/279480">Embeddings node not calling OpenAI</a>
+              <a href="https://community.n8n.io/t/vector-nodes-store-wrong-dimension-always-192/293231">Vector nodes store wrong dimension</a>
+              <a href="https://community.n8n.io/t/supabase-vector-store-node-returns-empty-output-no-error-while-sql-query-returns-matches/267685">Supabase Vector Store returns empty</a>
+              <a href="https://community.n8n.io/t/received-tool-input-did-not-match-expected-schema/75832">Received tool input did not match schema <span class="views">— 14.1k views</span></a>
+              <a href="https://community.n8n.io/t/error-could-not-connect-to-your-mcp-server-when-integrating-external-tool-via-sse-in-ai-agent/100957">MCP/SSE connection error <span class="views">— 15.4k views</span></a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">ai-agent</span><span class="tag">rag</span><span class="tag">embeddings</span><span class="tag">mcp</span><span class="tag">supabase</span></div>
+      </div>
+    </article>
+
+    <!-- 7 -->
+    <article class="issue">
+      <div class="num">07</div>
+      <div>
+        <h3>Loops, iteration &amp; data-shape errors</h3>
+        <div class="signal"><span class="dot"></span>Frequency: very high · Severity: workflow won't run · ~50k aggregate views</div>
+        <p>The single most teachable ticket category — these are nearly always user-error and almost always KB-able. Loop Over Items only processing the first item, "Input values have 3 keys, you must specify an input key", undefined data after a loop, and APIs that 400 only on the second iteration of a loop because the previous payload mutated state.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Misunderstanding of n8n's "items" pattern (each item independent)</li>
+              <li>Sub-workflow returning multiple keys without an input-key picker</li>
+              <li>Set node leaking state between iterations</li>
+              <li>HTTP node sending stale headers from prior loop iteration</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/loop-node-only-processes-the-first-item-how-to-fix/56727">Loop Node only processes first item <span class="views">— 6.8k views</span></a>
+              <a href="https://community.n8n.io/t/input-values-have-3-keys-you-must-specify-an-input-key-or-pass-only-1-key-as-input/74622">"Input values have 3 keys" <span class="views">— 7.3k views</span></a>
+              <a href="https://community.n8n.io/t/how-to-check-for-empty-node-output/10022">How to check for empty node output <span class="views">— 24.4k views</span></a>
+              <a href="https://community.n8n.io/t/help-evolution-api-throws-400-bad-request-object-object-only-on-the-2nd-item-inside-an-n8n-loop/293177">API 400 only on 2nd loop iteration</a>
+              <a href="https://community.n8n.io/t/loop-over-items-cant-handle-multiple-incoming-lists/234133">Loop can't handle multiple incoming lists</a>
+              <a href="https://community.n8n.io/t/have-your-say-help-us-improve-the-loop-over-items-node/92570">"Help us improve Loop Over Items" (n8n staff)</a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">loop</span><span class="tag">data-transformation</span><span class="tag">items</span><span class="tag">expressions</span></div>
+      </div>
+    </article>
+
+    <!-- 8 -->
+    <article class="issue">
+      <div class="num">08</div>
+      <div>
+        <h3>HTTP Request &amp; API debugging — proxies, ECONNREFUSED, custom auth</h3>
+        <div class="signal"><span class="dot"></span>Frequency: very high · Severity: integration-blocking · Direct JD core</div>
+        <p>The Senior Support Engineer's bread &amp; butter. Customers paste an HTTP Request node, get <span class="mono">ECONNREFUSED</span>, and need someone to walk through DNS → proxy → TLS → headers → body. Includes corporate proxies, local Ollama on a different host, AWS Bedrock SigV4, Bybit HMAC signatures, and self-signed certs against MS SQL Server.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Container can't reach <span class="mono">localhost</span> (it's the container's localhost)</li>
+              <li>Corporate proxy not set in <span class="mono">HTTP_PROXY</span>/<span class="mono">HTTPS_PROXY</span></li>
+              <li>HMAC/SigV4 string-to-sign assembled wrong</li>
+              <li>Self-signed cert rejected — needs <span class="mono">NODE_TLS_REJECT_UNAUTHORIZED=0</span> (with caveats) or CA bundle</li>
+              <li>Body sent as JSON when API expects form-encoded</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/http-request-via-proxy-connect-econnrefused-127-0-0-1-80/8469">HTTP Request via Proxy ECONNREFUSED <span class="views">— 24.5k views</span></a>
+              <a href="https://community.n8n.io/t/unable-to-connect-n8n-to-local-ollama-instance-econnrefused-error/90508">Unable to connect to local Ollama <span class="views">— 10.9k views</span></a>
+              <a href="https://community.n8n.io/t/aws-bedrock-invoke-using-http-node-not-working/292675">AWS Bedrock invoke not working</a>
+              <a href="https://community.n8n.io/t/self-signed-certificate-error-when-setting-ms-sql-server-connection/18863">Self-signed cert error MS SQL Server</a>
+              <a href="https://community.n8n.io/t/snowflake-key-pair-authentification/84720">Snowflake key-pair authentication</a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">http-request</span><span class="tag">tcp/ip</span><span class="tag">tls</span><span class="tag">proxy</span><span class="tag">api</span></div>
+      </div>
+    </article>
+
+    <!-- 9 -->
+    <article class="issue">
+      <div class="num">09</div>
+      <div>
+        <h3>Performance, memory &amp; large-data crashes</h3>
+        <div class="signal"><span class="dot"></span>Frequency: medium · Severity: production-incident · IC3 differentiator</div>
+        <p>The "is n8n down or is my workflow slow?" cluster. Workflows OOM-killed when processing 40k+ SQL rows, AI Agent extremely slow, qdrant data loader degrading on large datasets, RAM never released in queue mode, and webhook concurrency under load.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Loading entire result set into one item instead of streaming/paginating</li>
+              <li>Binary data stored in memory instead of <span class="mono">filesystem</span> mode</li>
+              <li>Worker concurrency × memory-per-execution exceeds container limit</li>
+              <li>Synchronous chain of LLM calls instead of parallel</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/workflow-crashes-when-processing-large-sql-results-40k-records-container-memory-overflow/216917">Workflow crashes on 40k SQL records — OOM</a>
+              <a href="https://community.n8n.io/t/why-is-the-ai-agent-in-n8n-is-extremely-slow-when-processing-data/73442">Why is AI Agent extremely slow <span class="views">— 7.2k views</span></a>
+              <a href="https://community.n8n.io/t/uploading-a-large-dataset-to-qdrant-data-loader-slowing-down/166481">Qdrant data loader slowing on large dataset</a>
+              <a href="https://community.n8n.io/t/long-time-until-job-is-processed-on-queue-mode/112679">Long time until job is processed in queue mode</a>
+              <a href="https://community.n8n.io/t/queue-mode-webhook-processing-concurrency-testing/66942">Queue mode webhook concurrency testing</a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">performance</span><span class="tag">memory</span><span class="tag">scaling</span><span class="tag">observability</span></div>
+      </div>
+    </article>
+
+    <!-- 10 -->
+    <article class="issue">
+      <div class="num">10</div>
+      <div>
+        <h3>Provider-specific node bugs &amp; regressions after upgrade</h3>
+        <div class="signal"><span class="dot"></span>Frequency: medium · Severity: integration broken on upgrade</div>
+        <p>The "it worked yesterday" cluster. A version bump breaks Snowflake Insert, an official node disappears from search results, Salesforce Case creation suddenly requires a Type Name, Gemini 3.0 tool-use returns "missing thought_signature," WhatsApp node behaves oddly with permanent API keys. Each one is a triage-and-escalate ticket.</p>
+        <div class="grid">
+          <div>
+            <h4>Root causes</h4>
+            <ul>
+              <li>Provider API change not yet reflected in n8n's node</li>
+              <li>n8n release introduced a regression in a specific node</li>
+              <li>Required field changed upstream without notice</li>
+              <li>Auth flow updated by provider (e.g., new permission scopes)</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Evidence</h4>
+            <div class="evidence">
+              <a href="https://community.n8n.io/t/snowflake-insert-node-stopped-working-after-update-to-2-17-5/290608">Snowflake Insert broken after 2.17.5</a>
+              <a href="https://community.n8n.io/t/cant-create-salesforce-case-without-a-type-name-value/293182">Can't create Salesforce Case without Type Name</a>
+              <a href="https://community.n8n.io/t/issue-with-gemini-3-0-gemini-3-pro-preview-tools-function-call-is-missing-a-thought-signature/223824">Gemini 3.0 tools "missing thought_signature"</a>
+              <a href="https://community.n8n.io/t/bug-with-an-official-node-not-showing-up-in-n8n-templates-and-search-results-please-help/251467">Official node not showing in search results</a>
+              <a href="https://community.n8n.io/t/issue-with-whatsapp-node-after-using-permanent-api-key/78504">WhatsApp node after permanent API key</a>
+              <a href="https://community.n8n.io/t/anthropic-credential-validation-fails-with-resource-not-found-but-api-key-works-via-curl/271100">Anthropic credential validation fails (curl works)</a>
+            </div>
+          </div>
+        </div>
+        <div class="tags"><span class="tag">node-regression</span><span class="tag">snowflake</span><span class="tag">salesforce</span><span class="tag">whatsapp</span><span class="tag">escalation</span></div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="section-rule">03 &nbsp;/&nbsp; JD coverage matrix</div>
+  <h2>Every issue maps to at least one JD core</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width: 38%;">Issue cluster</th>
+        <th>APIs &amp; integrations</th>
+        <th>Webhooks</th>
+        <th>Auth</th>
+        <th>Networking</th>
+        <th>JS / Node</th>
+        <th>Docker</th>
+        <th>Production complexity (IC3)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="first">01 — Webhook URL &amp; "Connection lost"</td><td></td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td></td></tr>
+      <tr><td class="first">02 — OAuth 2.0 credential failures</td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td><span class="check">●</span></td><td></td><td></td><td></td></tr>
+      <tr><td class="first">03 — Docker self-hosting &amp; persistence</td><td></td><td></td><td></td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td><span class="check">●</span></td></tr>
+      <tr><td class="first">04 — Queue mode &amp; worker scaling</td><td></td><td></td><td></td><td></td><td><span class="check">●</span></td><td><span class="check">●</span></td><td><span class="check">●</span></td></tr>
+      <tr><td class="first">05 — Webhook delivery &amp; idempotency</td><td><span class="check">●</span></td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td></td><td></td><td><span class="check">●</span></td></tr>
+      <tr><td class="first">06 — AI Agent / RAG production failures</td><td><span class="check">●</span></td><td></td><td></td><td></td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td></tr>
+      <tr><td class="first">07 — Loops &amp; data-shape errors</td><td></td><td></td><td></td><td></td><td><span class="check">●</span></td><td></td><td></td></tr>
+      <tr><td class="first">08 — HTTP Request &amp; API debugging</td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td><span class="check">●</span></td><td></td><td></td><td></td></tr>
+      <tr><td class="first">09 — Performance &amp; memory crashes</td><td></td><td></td><td></td><td></td><td><span class="check">●</span></td><td><span class="check">●</span></td><td><span class="check">●</span></td></tr>
+      <tr><td class="first">10 — Provider node regressions</td><td><span class="check">●</span></td><td></td><td><span class="check">●</span></td><td></td><td></td><td></td><td><span class="check">●</span></td></tr>
+    </tbody>
+  </table>
+
+  <p style="color: var(--ink-soft); margin-top: 24px;">
+    <strong>Read the matrix this way:</strong> if you build a portfolio that solves these 10 issues, you've demonstrated every <em>core</em> requirement on the JD with multiple independent proof points, plus the IC3-only "complex production environments" bullet five separate times. The companion file <span class="mono">projects.md</span> turns this matrix into a 12-project plan that hits 100% coverage.
+  </p>
+
+  <footer>
+    Sourced from <a href="https://community.n8n.io/">community.n8n.io</a> via Firecrawl scrapes performed May 1, 2026.
+    Categories: <em>Questions</em> (latest &amp; all-time top), <em>Help me Build my Workflow</em>, <em>Feature Requests</em>; tags: <span class="mono">queue-mode</span>, <span class="mono">docker</span>, <span class="mono">webhook</span>, <span class="mono">rag</span>.
+    n8n version at scrape time: stable 2.18.5 / beta 2.19.1.
+  </footer>
+
+</div>
+</body>
+</html>

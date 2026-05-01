@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Build Plan — Projects to Prove I Can Solve n8n's Top 10 Tickets</title>
+<style>
+  :root {
+    --ink:        #1c1a17;
+    --ink-soft:   #4a443d;
+    --ink-faint:  #7a7368;
+    --rule:       #e7e2da;
+    --paper:      #f6f1e8;
+    --paper-2:    #efe7d8;
+    --accent:     #b14b2c;
+    --accent-2:   #6c7a3a;
+    --tag-bg:     #ece4d3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Charter', 'Georgia', 'Times New Roman', serif;
+    line-height: 1.55;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono, code, kbd, .meta, .badge, .tag, .nav { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+  a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--accent); color: var(--accent); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 56px 28px 96px; }
+
+  /* nav */
+  .nav { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); border-bottom: 1px solid var(--rule); padding-bottom: 18px; margin-bottom: 56px; }
+  .nav strong { color: var(--ink); letter-spacing: 0.18em; }
+  .nav a { text-decoration: none; }
+  .nav a:hover { color: var(--accent); }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1fr; gap: 28px; margin-bottom: 64px; }
+  .eyebrow { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  h1 { font-size: clamp(36px, 5vw, 56px); line-height: 1.05; margin: 0 0 24px; letter-spacing: -0.01em; font-weight: 700; }
+  .lede { font-size: 20px; color: var(--ink-soft); max-width: 70ch; }
+  .lede strong { color: var(--ink); }
+
+  /* meta strip */
+  .meta-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin: 48px 0 56px; }
+  .meta-strip > div { padding: 18px 24px 18px 0; border-right: 1px solid var(--rule); }
+  .meta-strip > div:last-child { border-right: none; padding-right: 0; }
+  .meta-label { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .meta-value { font-size: 22px; font-weight: 700; }
+
+  /* sections */
+  h2 { font-size: 28px; letter-spacing: -0.005em; margin: 8px 0 8px; }
+  .section-rule { color: var(--ink-faint); font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 72px; }
+  .section-intro { color: var(--ink-soft); max-width: 70ch; margin-top: 0; }
+
+  /* bento */
+  .bento { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 24px 0 56px; }
+  .bento > div { background: var(--paper); padding: 22px 22px 26px; }
+  .bento h3 { font-size: 14px; font-family: ui-monospace, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 12px; font-weight: 600; }
+  .bento p { margin: 0; font-size: 15.5px; color: var(--ink-soft); }
+
+  /* callout */
+  .callout { background: var(--paper-2); border: 1px solid var(--rule); padding: 22px 26px; margin: 16px 0 0; }
+  .callout strong.lab { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 8px; }
+  .callout p { margin: 0; color: var(--ink-soft); }
+
+  /* projects */
+  .projects { border-top: 1px solid var(--rule); margin-top: 16px; }
+  .project { display: grid; grid-template-columns: 110px 1fr; gap: 32px; padding: 40px 0; border-bottom: 1px solid var(--rule); }
+  .project .id { padding-top: 6px; }
+  .project .id .pnum { font-family: ui-monospace, monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .project .id .ptitle { font-family: ui-monospace, monospace; font-weight: 700; font-size: 38px; color: var(--accent); line-height: 1; }
+  .project .id .pdays { display: inline-block; margin-top: 14px; padding: 4px 10px; background: var(--ink); color: var(--paper); font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .project .id .pdays.short { background: var(--accent-2); }
+  .project .id .pdays.long { background: var(--accent); }
+
+  .project h3 { font-size: 24px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.005em; }
+  .project .sub { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 18px; }
+  .project p { margin: 0 0 14px; color: var(--ink-soft); font-size: 16.5px; }
+  .project .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 18px; }
+  .project h4 { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 600; }
+  .project ul { margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 15px; }
+  .project ul li { margin: 5px 0; }
+  .project .deliv { background: var(--paper-2); border-left: 3px solid var(--accent-2); padding: 14px 18px; margin: 8px 0 18px; }
+  .project .deliv .lab { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 4px; }
+  .project .deliv span.body { color: var(--ink); font-size: 15px; }
+  .project blockquote { margin: 4px 0; padding: 0 0 0 14px; border-left: 2px solid var(--rule); color: var(--ink-soft); font-style: italic; font-size: 14.5px; }
+  .project blockquote + blockquote { margin-top: 6px; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .pill { background: var(--tag-bg); color: var(--ink-soft); padding: 4px 10px; border-radius: 2px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; font-family: ui-monospace, monospace; }
+  .pill.solid { background: var(--ink); color: var(--paper); }
+
+  pre { background: var(--paper-2); border: 1px solid var(--rule); padding: 14px 18px; overflow-x: auto; font-size: 13.5px; margin: 14px 0; }
+  code { background: var(--paper-2); padding: 1px 6px; font-size: 14.5px; }
+  pre code { background: transparent; padding: 0; }
+
+  /* tables */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-family: ui-monospace, monospace; font-size: 13px; }
+  table th, table td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table th { color: var(--ink-faint); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  table td.first { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  table td.first.serif { font-family: 'Iowan Old Style', 'Charter', 'Georgia', serif; font-size: 14.5px; font-weight: 600; white-space: normal; }
+  .check { color: var(--accent-2); font-weight: 700; text-align: center; }
+  .check.partial { color: var(--accent); }
+  table .row-check { text-align: center; color: var(--accent-2); font-weight: 700; }
+
+  /* sprint */
+  .sprint th, .sprint td { font-family: 'Iowan Old Style', 'Charter', 'Georgia', serif; font-size: 14.5px; }
+  .sprint th { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .sprint td.day { font-family: ui-monospace, monospace; font-size: 14px; font-weight: 700; color: var(--accent); text-align: center; width: 60px; }
+
+  /* cover-letter quote */
+  .cover-quote { background: var(--paper-2); border: 1px solid var(--rule); padding: 28px 32px; margin: 24px 0; font-size: 17px; color: var(--ink); line-height: 1.6; }
+  .cover-quote em { color: var(--ink-soft); }
+
+  /* footer */
+  footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--ink-faint); font-size: 13px; }
+
+  @media (max-width: 740px) {
+    .meta-strip { grid-template-columns: repeat(2, 1fr); }
+    .meta-strip > div { border-right: none; border-bottom: 1px solid var(--rule); }
+    .bento { grid-template-columns: 1fr; }
+    .project { grid-template-columns: 1fr; gap: 14px; }
+    .project .grid { grid-template-columns: 1fr; }
+    .project .id .ptitle { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="nav">
+    <span><strong>Build Plan</strong> &nbsp;·&nbsp; companion to <a href="top-10-issues.html">top-10-issues.html</a></span>
+    <span>v1 · May 2026</span>
+  </div>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Senior Support Engineer · 14-Day Portfolio Sprint</div>
+      <h1>12 projects to prove I can solve 90&ndash;100% of n8n's top support tickets.</h1>
+      <p class="lede">
+        Every project below maps 1-to-many against the <a href="top-10-issues.html">ten ticket clusters identified from a fresh Firecrawl scrape of community.n8n.io</a>.
+        The coverage matrix at the bottom shows the full sprint hits <strong>100% of the Top 10</strong> &mdash; with each issue covered by at least three independent deliverables.
+        Less a portfolio than a public preview of the first 90 days on the job.
+      </p>
+    </div>
+  </header>
+
+  <div class="meta-strip">
+    <div>
+      <div class="meta-label">Projects</div>
+      <div class="meta-value">12</div>
+    </div>
+    <div>
+      <div class="meta-label">Issue coverage</div>
+      <div class="meta-value">100%</div>
+    </div>
+    <div>
+      <div class="meta-label">Sprint length</div>
+      <div class="meta-value">14 days</div>
+    </div>
+    <div>
+      <div class="meta-label">Public artifacts</div>
+      <div class="meta-value">30+</div>
+    </div>
+  </div>
+
+  <div class="section-rule">00 &nbsp;/&nbsp; Why this exists</div>
+  <h2>Show, don't tell.</h2>
+  <p class="section-intro">
+    I'm applying for the <strong>Senior Support Engineer</strong> role at n8n. Rather than send a resume that <em>says</em> "I can debug things," I'm shipping artifacts that <em>show</em> I've already been doing the job &mdash; for free, in public, against the live forum.
+    For each of the 10 ticket clusters in <a href="top-10-issues.html">top-10-issues.html</a>, I commit to producing a <strong>reproduction</strong>, a <strong>knowledge-base article</strong>, and a <strong>public answer on the forum</strong>. That's 30 deliverables. The 12 projects below are the <em>containers</em> for those deliverables, organized to maximize signal per hour.
+  </p>
+
+  <div class="bento">
+    <div>
+      <h3>Reading the cards</h3>
+      <p>Every project has: a one-paragraph description, a concrete deliverable, the JD bullets it proves, the issue numbers it covers, and a realistic time-box.</p>
+    </div>
+    <div>
+      <h3>The recommended order</h3>
+      <p>Start with Project 3 (forum push &mdash; do it today), then Project 1 (repro lab &mdash; the centerpiece), then Project 2 (KB articles). The other nine layer on top.</p>
+    </div>
+    <div>
+      <h3>Highest-ROI single move</h3>
+      <p>Project 3. Spending 45 min/day answering open forum threads and landing on the Support Leaderboard is the most direct, audit-able evidence of the role you can produce.</p>
+    </div>
+  </div>
+
+  <div class="section-rule">01 &nbsp;/&nbsp; The 12 projects</div>
+  <h2>Ranked by ROI for the application</h2>
+  <p class="section-intro">If you only build three: <strong>3 → 1 → 2</strong>. If you build all twelve, you ship the entire matrix.</p>
+
+  <div class="projects">
+
+    <!-- P1 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 01</div>
+        <div class="ptitle">repro<br/>lab</div>
+        <span class="pdays long">5 days</span>
+      </div>
+      <div>
+        <h3>The centerpiece &mdash; <code>n8n-repro-lab</code></h3>
+        <div class="sub">Public monorepo · One folder per ticket cluster</div>
+        <p>A public GitHub monorepo where each subfolder is a <strong>minimum reproduction</strong> of a real ticket from the forum. Each repro ships:</p>
+        <ul>
+          <li><code>docker-compose.yml</code> that boots a clean stack (n8n + dependencies)</li>
+          <li><code>REPRO.md</code> &mdash; exact steps, observed vs. expected output</li>
+          <li><code>ROOT_CAUSE.md</code> &mdash; why it happens, with citations to source code or release notes</li>
+          <li><code>WORKAROUND.md</code> &mdash; what to tell the customer today</li>
+          <li><code>FIX.md</code> when a patch exists upstream &mdash; link to the PR or commit</li>
+        </ul>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">Repo at <code>github.com/&lt;you&gt;/n8n-repro-lab</code> with at least 10 working repros, one per Top-10 cluster.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Investigate and reproduce complex technical issues across the n8n ecosystem"</blockquote>
+            <blockquote>"Strong troubleshooting and problem-solving skills"</blockquote>
+            <blockquote>"Experience with Docker or containerized environments"</blockquote>
+            <blockquote>"Strong knowledge of Node.js environments and containerized deployments" (IC3)</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">02</span><span class="pill solid">03</span><span class="pill solid">04</span><span class="pill solid">05</span><span class="pill solid">06</span><span class="pill solid">07</span><span class="pill solid">08</span><span class="pill solid">09</span><span class="pill solid">10</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 14px;"><em>All ten. The repro lab is the spine of the portfolio.</em></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P2 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 02</div>
+        <div class="ptitle">kb<br/>×&nbsp;10</div>
+        <span class="pdays">3 days</span>
+      </div>
+      <div>
+        <h3>10 polished knowledge-base articles &mdash; <code>n8n-troubleshooting-kb</code></h3>
+        <div class="sub">Markdown · Hosted blog · Linked into every repro</div>
+        <p>Public KB articles, one per cluster, written in n8n's documentation voice (clear, second-person, scannable). Each article follows the same structure so customers can self-serve in under 90 seconds:</p>
+<pre><code># [Symptom phrased the way customers Google it]
+
+## Confirm it's this issue
+## Why it happens
+## Fix
+## Prevent it next time
+## Related forum threads</code></pre>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">10 published articles, &le; 1,200 words each, hosted at <code>&lt;you&gt;.dev/n8n-kb</code> and cross-linked from the matching folder in the repro lab.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Create and maintain documentation, FAQs, and knowledge base articles"</blockquote>
+            <blockquote>"Strong written and verbal communication skills"</blockquote>
+            <blockquote>"Experience documenting troubleshooting steps and improving support knowledge bases"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">02</span><span class="pill solid">03</span><span class="pill solid">04</span><span class="pill solid">05</span><span class="pill solid">06</span><span class="pill solid">07</span><span class="pill solid">08</span><span class="pill solid">09</span><span class="pill solid">10</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 14px;"><em>~2 hrs per article since the repro lab gives you the source content.</em></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P3 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 03</div>
+        <div class="ptitle">forum<br/>push</div>
+        <span class="pdays short">Day 0</span>
+      </div>
+      <div>
+        <h3>Forum reputation push &mdash; the highest-ROI single move</h3>
+        <div class="sub">Start today · 45 min/day · Audit-able by the hiring panel</div>
+        <p>Spend 45 minutes a day for 14 days answering open threads in the <a href="https://community.n8n.io/c/questions/12?max_posts=1">Find open questions</a> feed. Goal: a visible spot on the <a href="https://community.n8n.io/leaderboard/18">Support Leaderboard</a> and the <strong>Answer &amp; Earn</strong> badge before the application is submitted.</p>
+        <p>This is the single project that puts you in the top 1% of applicants because it's <em>literally</em> the job, and the panel can pull up your forum profile during the interview.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">A forum profile with 30+ helpful answers, screenshot of leaderboard rank, link in the cover letter.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Provide technical support to users via tickets, chat, and community forums"</blockquote>
+            <blockquote>"Contribute to the community by answering questions and sharing best practices"</blockquote>
+            <blockquote>"Passion for helping users and improving product usability"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">02</span><span class="pill solid">03</span><span class="pill solid">04</span><span class="pill solid">05</span><span class="pill solid">06</span><span class="pill solid">07</span><span class="pill solid">08</span><span class="pill solid">09</span><span class="pill solid">10</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 14px;"><em>You'll see all of them in the live queue.</em></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P4 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 04</div>
+        <div class="ptitle">debug<br/>cli</div>
+        <span class="pdays">3 days</span>
+      </div>
+      <div>
+        <h3>Tooling that scales me &mdash; <code>n8n-debug-cli</code></h3>
+        <div class="sub">Node.js · npm package · ~300 LOC</div>
+        <p>A small CLI that turns repeated support work into one-line commands:</p>
+<pre><code>n8n-debug repro &lt;cluster&gt;          # boots a docker-compose repro from the lab
+n8n-debug logs  &lt;execution.json&gt;   # parses an execution export, surfaces error/stack/timing outliers
+n8n-debug webhook &lt;url&gt; [--secret] # sends test payloads with HMAC, header inspection
+n8n-debug oauth &lt;url&gt;              # decodes JWT, traces redirect chain, checks callback URL
+n8n-debug net   &lt;host&gt;             # one-shot DNS/TLS/HTTP/proxy diagnostic</code></pre>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">Repo at <code>github.com/&lt;you&gt;/n8n-debug-cli</code> with README, npm package, GitHub Actions CI.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Experience working with JavaScript, Node.js, or similar technologies"</blockquote>
+            <blockquote>"Help improve support tooling and resolution efficiency"</blockquote>
+            <blockquote>"Experience debugging APIs, integrations, webhooks, and authentication flows"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">02</span><span class="pill solid">05</span><span class="pill solid">07</span><span class="pill solid">08</span><span class="pill solid">09</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 14px;"><em>Start with <code>logs</code> and <code>webhook</code> &mdash; highest daily-use value.</em></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P5 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 05</div>
+        <div class="ptitle">auth<br/>guide</div>
+        <span class="pdays">2 days</span>
+      </div>
+      <div>
+        <h3>Auth troubleshooting master guide + JWT/HMAC decoder</h3>
+        <div class="sub">Long-form post · Local-only web utility</div>
+        <p>One article: <em>"Debugging OAuth2, OIDC, JWT, and HMAC in n8n: a flowchart."</em> Plus a static web tool for decoding tokens and signatures locally (no upload). Covers the six most common failure modes from the forum: callback URL on <code>localhost</code>, the <code>allowedDomains</code> Public-API contradiction, refresh-token expiry, ngrok loop-back, HMAC string-to-sign assembly, OAuth1 vs OAuth2 in legacy nodes.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">One blog post + one mini web tool. Both linked from KB article #2.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Experience debugging APIs, integrations, webhooks, and authentication flows"</blockquote>
+            <blockquote>"Familiarity with authentication protocols (OAuth2, OIDC, SAML, JWT)"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">02</span><span class="pill solid">05</span><span class="pill solid">08</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P6 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 06</div>
+        <div class="ptitle">self<br/>host</div>
+        <span class="pdays">3 days</span>
+      </div>
+      <div>
+        <h3>Self-hosting reference bundle</h3>
+        <div class="sub">3 docker-compose variants · Migration scripts · 30-step README</div>
+        <p>Opinionated <code>docker-compose.yml</code> set + step-by-step README that solves the most common deployment tickets in one place: persistent volumes, encryption-key handling, <code>WEBHOOK_URL</code> correctness behind nginx/Caddy/Cloudflare, healthcheck, safe upgrade procedure, <strong>SQLite → Postgres migration script</strong> (bash + node), and a backup workflow.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">Repo <code>github.com/&lt;you&gt;/n8n-selfhost-reference</code> with three compose variants (single-node SQLite, single-node Postgres, queue-mode Postgres+Redis), 30-step README, and a Makefile.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Experience with Docker or containerized environments"</blockquote>
+            <blockquote>"Strong troubleshooting and problem-solving skills"</blockquote>
+            <blockquote>"Solid understanding of networking fundamentals"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">03</span><span class="pill solid">04</span><span class="pill solid">09</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P7 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 07</div>
+        <div class="ptitle">webhook<br/>tree</div>
+        <span class="pdays short">1.5 days</span>
+      </div>
+      <div>
+        <h3>Webhook &amp; trigger diagnostic playbook</h3>
+        <div class="sub">Mermaid decision tree · curl/bash helper</div>
+        <p>A decision tree (Mermaid in a public Gist or Notion page) that walks through every "my webhook isn't firing" symptom: test vs. production URL, double-trigger, idempotency, retry on 5xx, provider-specific quirks (WhatsApp delays, Google Apps Script intermittent 403). Includes companion bash script <code>webhook-trace.sh</code> that runs the diagnostic flow against any live n8n instance.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">A Notion or GitHub page + the bash helper, embedded in KB article #5.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Diagnose and troubleshoot issues related to n8n workflows, integrations, and performance"</blockquote>
+            <blockquote>"Document troubleshooting workflows and build internal playbooks"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">05</span><span class="pill solid">07</span><span class="pill solid">08</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P8 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 08</div>
+        <div class="ptitle">rag<br/>check</div>
+        <span class="pdays">2 days</span>
+      </div>
+      <div>
+        <h3>AI Agent / RAG production checklist</h3>
+        <div class="sub">Compose stack · Eval harness · 5-min triage</div>
+        <p>A reusable "is your RAG actually working?" checklist + a <code>docker-compose.yml</code> that boots n8n + Qdrant + a known-good corpus + a tiny eval harness (RAGAS-style, just precision@k for now). Designed so you can paste a customer's workflow, point it at the lab corpus, and get a green/red answer in under 5 minutes.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">Repo subfolder <code>n8n-repro-lab/06-rag-production-checklist/</code> with README, compose stack, eval script.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Diagnose and troubleshoot issues related to n8n workflows, integrations, and performance"</blockquote>
+            <blockquote>Lands the implicit "AI orchestration" pitch in the JD intro.</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">06</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P9 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 09</div>
+        <div class="ptitle">obs<br/>stack</div>
+        <span class="pdays">2 days</span>
+      </div>
+      <div>
+        <h3>Performance triage toolkit + observability stack</h3>
+        <div class="sub">Prometheus · Loki · Grafana · Pre-wired dashboard</div>
+        <p>A <code>docker-compose.yml</code> that runs n8n + Prometheus + Loki + Grafana, pre-wired with a starter dashboard (execution latency p50/p95/p99, error rate, queue depth, worker memory, Redis ops/sec). Plus a short methodology doc: how to triage "slow workflow" tickets in under 10 minutes using the dashboard.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">Repo <code>github.com/&lt;you&gt;/n8n-observability-starter</code> + a methodology blog post.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Observability tools such as Grafana, Datadog, or Prometheus" (nice-to-have)</blockquote>
+            <blockquote>"Strong experience troubleshooting complex production environments" (IC3)</blockquote>
+            <blockquote>"Ability to identify systemic issues and drive improvements in product reliability" (IC3)</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">04</span><span class="pill solid">09</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P10 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 10</div>
+        <div class="ptitle">upstream<br/>pr</div>
+        <span class="pdays short">1 day</span>
+      </div>
+      <div>
+        <h3>One PR to <code>n8n-io/n8n</code></h3>
+        <div class="sub">Smallest credible fix · Even a docs PR counts</div>
+        <p>Pick the smallest real bug from the forum that an outsider can credibly fix &mdash; almost always a docs typo, a missing-field validation, or a localized node fix. Submit a clean PR with tests if applicable. Examples of viable starter PRs from the forum data:</p>
+        <ul>
+          <li>Docs PR clarifying <code>WEBHOOK_URL</code> vs. <code>N8N_HOST</code> (Issue 1)</li>
+          <li>Docs PR for safe SQLite → Postgres migration (Issue 3)</li>
+          <li>Snowflake Insert regression repro added to test fixtures (Issue 10)</li>
+        </ul>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">One merged or under-review PR linked in the cover letter.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Collaborate with Engineering and Product teams to escalate, triage, and resolve product issues"</blockquote>
+            <blockquote>"Experience collaborating closely with engineering on complex technical issues" (IC3)</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill">01</span><span class="pill">03</span><span class="pill">10</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 14px;"><em>Pick one of the three based on whichever has the easiest credible fix.</em></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P11 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 11</div>
+        <div class="ptitle">systemic<br/>report</div>
+        <span class="pdays short">1 day</span>
+      </div>
+      <div>
+        <h3>"Top systemic issues in n8n &mdash; Q2 2026" public report</h3>
+        <div class="sub">~2,000 words · Substack/blog · The IC3 differentiator</div>
+        <p>A single public post that opens with: <em>"I scraped the n8n forum and analyzed N threads. Here are the top 5 systemic issues, ranked by ticket volume × business impact, plus what I'd ship to fix the top 3."</em> Use the data already in <code>top-10-issues.html</code> as the source.</p>
+        <p>This is the IC3-vs-IC2 differentiator. It's one thing to fix tickets; it's another to look across 200 tickets and tell product <em>what to fix</em>.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">One ~2,000-word post with at least one chart, linked from the cover letter.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Identify recurring issues and propose improvements to product reliability and user experience"</blockquote>
+            <blockquote>"Ability to identify systemic issues and drive improvements in product reliability and support processes" (IC3)</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">02</span><span class="pill solid">03</span><span class="pill solid">04</span><span class="pill solid">05</span><span class="pill solid">06</span><span class="pill solid">07</span><span class="pill solid">08</span><span class="pill solid">09</span><span class="pill solid">10</span>
+            </div>
+            <p style="margin-top: 12px; font-size: 14px;"><em>Operates above all 10. Meta-coverage.</em></p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- P12 -->
+    <article class="project">
+      <div class="id">
+        <div class="pnum">Project 12</div>
+        <div class="ptitle">net<br/>cheat</div>
+        <span class="pdays short">1 day</span>
+      </div>
+      <div>
+        <h3>Networking cheat sheet (DNS / HTTP / TCP / TLS)</h3>
+        <div class="sub">One dense reference page · Copy-pasteable curl/dig/tcpdump</div>
+        <p>A single dense reference covering the network primitives that show up in n8n tickets: DNS resolution inside Docker, container-to-host networking, HTTP/2 vs HTTP/1.1, TLS handshake debugging, IPv6 fallback, Cloudflare proxy interactions, ngrok mechanics, corporate proxy configuration. Each section ends with a copy-pasteable <code>curl</code> / <code>dig</code> / <code>tcpdump</code> invocation.</p>
+        <div class="deliv">
+          <span class="lab">Concrete deliverable</span>
+          <span class="body">One long blog post, linked from KB articles #1, #5, and #8.</span>
+        </div>
+        <div class="grid">
+          <div>
+            <h4>JD bullets it proves</h4>
+            <blockquote>"Solid understanding of networking fundamentals (DNS, HTTP/HTTPS, TCP/IP)"</blockquote>
+          </div>
+          <div>
+            <h4>Issues covered</h4>
+            <div class="pills">
+              <span class="pill solid">01</span><span class="pill solid">05</span><span class="pill solid">08</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="section-rule">02 &nbsp;/&nbsp; Coverage matrix</div>
+  <h2>Proving 100% coverage</h2>
+  <p class="section-intro">Each row is a project. Each column is one of the Top 10 issue clusters. A filled dot means the project produces a tangible deliverable that a customer with that ticket type would benefit from.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 24%;">Project</th>
+          <th>01<br/><span style="font-weight: 400; color: var(--ink-faint);">Webhook URL</span></th>
+          <th>02<br/><span style="font-weight: 400; color: var(--ink-faint);">OAuth</span></th>
+          <th>03<br/><span style="font-weight: 400; color: var(--ink-faint);">Docker</span></th>
+          <th>04<br/><span style="font-weight: 400; color: var(--ink-faint);">Queue</span></th>
+          <th>05<br/><span style="font-weight: 400; color: var(--ink-faint);">Webhook&nbsp;deliv.</span></th>
+          <th>06<br/><span style="font-weight: 400; color: var(--ink-faint);">AI/RAG</span></th>
+          <th>07<br/><span style="font-weight: 400; color: var(--ink-faint);">Loops</span></th>
+          <th>08<br/><span style="font-weight: 400; color: var(--ink-faint);">HTTP&nbsp;debug</span></th>
+          <th>09<br/><span style="font-weight: 400; color: var(--ink-faint);">Perf</span></th>
+          <th>10<br/><span style="font-weight: 400; color: var(--ink-faint);">Node&nbsp;regr.</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="first serif">01 — repro lab</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td></tr>
+        <tr><td class="first serif">02 — KB articles</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td></tr>
+        <tr><td class="first serif">03 — forum push</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td></tr>
+        <tr><td class="first serif">04 — debug-cli</td><td class="row-check">●</td><td class="row-check">●</td><td></td><td></td><td class="row-check">●</td><td></td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td></td></tr>
+        <tr><td class="first serif">05 — auth guide</td><td></td><td class="row-check">●</td><td></td><td></td><td class="row-check">●</td><td></td><td></td><td class="row-check">●</td><td></td><td></td></tr>
+        <tr><td class="first serif">06 — self-host bundle</td><td class="row-check">●</td><td></td><td class="row-check">●</td><td class="row-check">●</td><td></td><td></td><td></td><td></td><td class="row-check">●</td><td></td></tr>
+        <tr><td class="first serif">07 — webhook playbook</td><td class="row-check">●</td><td></td><td></td><td></td><td class="row-check">●</td><td></td><td class="row-check">●</td><td class="row-check">●</td><td></td><td></td></tr>
+        <tr><td class="first serif">08 — RAG checklist</td><td></td><td></td><td></td><td></td><td></td><td class="row-check">●</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td class="first serif">09 — observability stack</td><td></td><td></td><td></td><td class="row-check">●</td><td></td><td></td><td></td><td></td><td class="row-check">●</td><td></td></tr>
+        <tr><td class="first serif">10 — upstream PR</td><td class="row-check" style="color: var(--accent);">◐</td><td></td><td class="row-check" style="color: var(--accent);">◐</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="row-check" style="color: var(--accent);">◐</td></tr>
+        <tr><td class="first serif">11 — systemic report</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td><td class="row-check">●</td></tr>
+        <tr><td class="first serif">12 — networking cheat</td><td class="row-check">●</td><td></td><td></td><td></td><td class="row-check">●</td><td></td><td></td><td class="row-check">●</td><td></td><td></td></tr>
+        <tr style="background: var(--paper-2);">
+          <td class="first" style="font-family: ui-monospace, monospace; font-weight: 700;">PROJECTS&nbsp;HITTING&nbsp;ISSUE</td>
+          <td class="row-check"><strong>7</strong></td>
+          <td class="row-check"><strong>5</strong></td>
+          <td class="row-check"><strong>5</strong></td>
+          <td class="row-check"><strong>5</strong></td>
+          <td class="row-check"><strong>6</strong></td>
+          <td class="row-check"><strong>4</strong></td>
+          <td class="row-check"><strong>5</strong></td>
+          <td class="row-check"><strong>6</strong></td>
+          <td class="row-check"><strong>6</strong></td>
+          <td class="row-check"><strong>4</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="color: var(--ink-soft); margin-top: 16px;">
+    <strong>Read the bottom row this way:</strong> every issue is hit by at least 4 independent projects. The lowest-covered (06 AI/RAG and 10 node regressions) are still addressed by 4 projects each. <strong>Coverage achieved: 100%.</strong>
+  </p>
+
+  <div class="section-rule">03 &nbsp;/&nbsp; Sprint plan</div>
+  <h2>14 days to application-ready</h2>
+  <p class="section-intro">Working ~3 hrs/day weekdays, ~5 hrs/day weekends. Adjust as needed. Each row is one calendar day with a morning block (~1.5h) and an afternoon block (~1.5h).</p>
+
+  <div class="table-wrap">
+    <table class="sprint">
+      <thead>
+        <tr>
+          <th style="width: 60px; text-align: center;">Day</th>
+          <th style="width: 38%;">Morning (1.5h)</th>
+          <th style="width: 38%;">Afternoon (1.5h)</th>
+          <th>Cumulative deliverable</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="day">1</td><td>Forum push: 5 answers</td><td>Repro #1 (Webhook URL)</td><td>1 repro · 5 forum answers</td></tr>
+        <tr><td class="day">2</td><td>Forum push: 5 answers</td><td>Repro #2 (OAuth) + KB #2</td><td>2 repros · 1 KB · 10 answers</td></tr>
+        <tr><td class="day">3</td><td>Forum push</td><td>Repro #3 (Docker) + Self-host bundle skeleton</td><td>3 repros · scaffolded P6</td></tr>
+        <tr><td class="day">4</td><td>Repro #4 (Queue mode)</td><td>Self-host bundle: queue-mode variant</td><td>4 repros · P6 50%</td></tr>
+        <tr><td class="day">5</td><td>Repro #5 (Webhook delivery)</td><td>KB #1, #3, #4, #5 (4 articles)</td><td>5 repros · 5 KB</td></tr>
+        <tr><td class="day">6</td><td>Repro #6 (AI/RAG) + RAG checklist</td><td>n8n-debug-cli: <code>logs</code> + <code>webhook</code> commands</td><td>6 repros · P4 40%</td></tr>
+        <tr><td class="day">7</td><td>Repro #7 (Loops) + Repro #8 (HTTP debug)</td><td>KB #6, #7, #8</td><td>8 repros · 8 KB</td></tr>
+        <tr><td class="day">8</td><td>Repro #9 (Performance) + Observability stack</td><td>Auth guide draft</td><td>9 repros · P9 done</td></tr>
+        <tr><td class="day">9</td><td>Repro #10 (Node regressions) + KB #9, #10</td><td>n8n-debug-cli: <code>oauth</code> + <code>net</code> commands</td><td>10 repros · 10 KB · P4 done</td></tr>
+        <tr><td class="day">10</td><td>Webhook playbook + Networking cheat sheet</td><td>Polish auth guide, publish</td><td>P5 · P7 · P12 done</td></tr>
+        <tr><td class="day">11</td><td>Pick + prepare upstream PR</td><td>Submit upstream PR</td><td>P10 done</td></tr>
+        <tr><td class="day">12</td><td>Draft systemic-issues report</td><td>Polish all READMEs</td><td>P11 done</td></tr>
+        <tr><td class="day">13</td><td>Forum push (heavy)</td><td>Record 3 Loom videos for top KB articles</td><td>Loomed evidence</td></tr>
+        <tr><td class="day">14</td><td>Final pass: cross-link everything</td><td>Submit application</td><td><strong>All 12 projects shipped</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-rule">04 &nbsp;/&nbsp; Cover-letter framing</div>
+  <h2>Use this paragraph verbatim</h2>
+
+  <div class="cover-quote">
+    <em>Before applying, I scraped community.n8n.io with Firecrawl and analyzed roughly 210 recent threads to identify the ten recurring issues that arrive most often as support tickets. I then built a public reproduction lab covering all ten, wrote ten matching knowledge-base articles, shipped a Node.js debug CLI to scale my own work, and personally answered N questions on the forum (profile linked). The full report and project portfolio are in</em> <code>top-10-issues.html</code> <em>and</em> <code>projects.md</code>. <em>I'm sending these because they are the closest available preview of what I would do as a Senior Support Engineer at n8n during my first 90 days.</em>
+  </div>
+
+  <p style="color: var(--ink-soft);">That paragraph + the linked artifacts is what puts you in the top 1% of applicants for this role.</p>
+
+  <div class="section-rule">05 &nbsp;/&nbsp; What this portfolio is not</div>
+  <h2>Deliberate omissions</h2>
+
+  <div class="bento" style="grid-template-columns: 1fr 1fr;">
+    <div>
+      <h3>It is not</h3>
+      <p>
+        &mdash; A flashy product or AI demo (wrong role)<br/>
+        &mdash; A long architecture treatise (you're applying to a support team, not a platform team)<br/>
+        &mdash; A massive open-source project that takes 6 months (you need to apply this month)
+      </p>
+    </div>
+    <div>
+      <h3>It is, intentionally</h3>
+      <p>
+        &mdash; <strong>Reproducible work</strong> that mirrors the daily job<br/>
+        &mdash; <strong>Documentation that helps real users today</strong><br/>
+        &mdash; <strong>Forum reputation</strong> the hiring panel can audit live during the interview
+      </p>
+    </div>
+  </div>
+
+  <p style="text-align: center; margin-top: 56px; font-family: ui-monospace, monospace; font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);">Ship&nbsp;it.</p>
+
+  <footer>
+    Companion to <a href="top-10-issues.html">top-10-issues.html</a>.
+    Portfolio designed against the n8n <em>Senior Support Engineer | Remote | North America</em> JD.
+    Sources: <a href="https://community.n8n.io/">community.n8n.io</a> via Firecrawl, May 2026.
+  </footer>
+
+</div>
+</body>
+</html>

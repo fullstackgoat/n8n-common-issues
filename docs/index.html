@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>n8n-common-issues — Field Notes for Self-Hosters & Support Engineers</title>
+<meta name="description" content="A field-tested reference for the most common problems n8n users actually run into, with reproductions, knowledge-base articles, and self-hosting blueprints." />
+<style>
+  :root {
+    --ink:        #1c1a17;
+    --ink-soft:   #4a443d;
+    --ink-faint:  #7a7368;
+    --rule:       #e7e2da;
+    --paper:      #f6f1e8;
+    --paper-2:    #efe7d8;
+    --accent:     #b14b2c;
+    --accent-2:   #6c7a3a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Charter', 'Georgia', 'Times New Roman', serif;
+    line-height: 1.55;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono, .nav { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+  a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+  a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .container { max-width: 920px; margin: 0 auto; padding: 56px 28px 96px; }
+
+  .nav { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); border-bottom: 1px solid var(--rule); padding-bottom: 18px; margin-bottom: 56px; }
+  .nav strong { color: var(--ink); letter-spacing: 0.18em; }
+  .nav a { text-decoration: none; }
+
+  .eyebrow { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; margin: 0 0 24px; letter-spacing: -0.01em; font-weight: 700; }
+  .lede { font-size: 19px; color: var(--ink-soft); max-width: 64ch; }
+  .lede strong { color: var(--ink); }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 56px 0; }
+  .card { background: var(--paper); padding: 28px 28px 32px; text-decoration: none; color: var(--ink); display: block; transition: background .15s ease; }
+  .card:hover { background: var(--paper-2); color: var(--ink); }
+  .card .badge { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; display: block; }
+  .card h2 { margin: 0 0 10px; font-size: 22px; line-height: 1.2; letter-spacing: -0.005em; }
+  .card p { margin: 0; color: var(--ink-soft); font-size: 15px; }
+
+  .links { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--rule); margin-top: 40px; }
+  .links a { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; }
+  .links a:hover { color: var(--accent); }
+  .links a .label { font-size: 17px; }
+  .links a .meta { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+
+  footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--ink-faint); font-size: 13px; }
+
+  @media (max-width: 640px) {
+    .cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="nav">
+    <span><strong>n8n-common-issues</strong></span>
+    <span><a href="https://github.com/PaulCertified/n8n-common-issues">github &rarr;</a></span>
+  </div>
+
+  <div class="eyebrow">Field notes for self-hosters &amp; support engineers</div>
+  <h1>The 10 issues n8n users actually run into &mdash; with reproductions, fixes, and the data behind the ranking.</h1>
+  <p class="lede">
+    Sourced from a fresh Firecrawl scrape of <a href="https://community.n8n.io/">community.n8n.io</a>: latest &amp; all-time top <em>Questions</em>, top <em>Help me Build my Workflow</em>, top <em>Feature Requests</em>, plus the <span class="mono">queue-mode</span>, <span class="mono">docker</span>, <span class="mono">webhook</span>, and <span class="mono">rag</span> tag pages.
+    Every issue ships with a Docker-Compose reproduction, a knowledge-base article, and links to real source threads.
+  </p>
+
+  <div class="cards">
+    <a href="top-10-issues.html" class="card">
+      <span class="badge">Field report &middot; HTML</span>
+      <h2>The Top 10 Issues</h2>
+      <p>The clustered analysis. What the issues are, why they happen, what the evidence looks like, and how each maps to a JD requirement.</p>
+    </a>
+    <a href="projects.html" class="card">
+      <span class="badge">Build plan &middot; HTML</span>
+      <h2>The 12-Project Sprint</h2>
+      <p>The companion plan: 12 projects that, taken together, cover 100% of the Top 10. With a 14-day sprint schedule.</p>
+    </a>
+  </div>
+
+  <h2 style="font-size: 22px; margin-bottom: 0;">Quick links</h2>
+  <div class="links">
+    <a href="https://github.com/PaulCertified/n8n-common-issues#whats-inside">
+      <span class="label">Repo overview &mdash; <em>What's inside</em></span>
+      <span class="meta">README</span>
+    </a>
+    <a href="https://github.com/PaulCertified/n8n-common-issues/tree/main/repros/01-webhook-url">
+      <span class="label">Repro 01 &mdash; Webhook URL &amp; "Connection lost"</span>
+      <span class="meta">Reproduction</span>
+    </a>
+    <a href="https://github.com/PaulCertified/n8n-common-issues/blob/main/kb/01-webhook-url.md">
+      <span class="label">KB 01 &mdash; My webhook URL says <code>localhost:5678</code></span>
+      <span class="meta">Knowledge base</span>
+    </a>
+    <a href="https://github.com/PaulCertified/n8n-common-issues/tree/main/repros">
+      <span class="label">All reproductions</span>
+      <span class="meta">repros/</span>
+    </a>
+    <a href="https://github.com/PaulCertified/n8n-common-issues/tree/main/kb">
+      <span class="label">All knowledge-base articles</span>
+      <span class="meta">kb/</span>
+    </a>
+  </div>
+
+  <footer>
+    Built &amp; maintained by <a href="https://github.com/PaulCertified">Paul Gipson</a>.
+    Sourced from <a href="https://community.n8n.io/">community.n8n.io</a> &middot; n8n stable 2.18.5 / beta 2.19.1 at scrape time.
+    MIT licensed.
+  </footer>
+
+</div>
+</body>
+</html>
