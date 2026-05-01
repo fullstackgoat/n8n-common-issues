@@ -6,7 +6,7 @@
 [![Built for n8n](https://img.shields.io/badge/built%20for-n8n-b14b2c.svg?style=flat-square)](https://n8n.io)
 [![Sourced from](https://img.shields.io/badge/sourced%20from-community.n8n.io-6c7a3a.svg?style=flat-square)](https://community.n8n.io)
 
-If you Googled your way here because n8n is misbehaving — start with the [Top 10 Issues report](https://paulcertified.github.io/n8n-common-issues/top-10-issues.html). Odds are good your problem is one of them, and there's a fix linked from this repo.
+If you Googled your way here because n8n is misbehaving — start with the [Top 10 Issues report](https://fullstackgoat.github.io/n8n-common-issues/top-10-issues.html). Odds are good your problem is one of them, and there's a fix linked from this repo.
 
 ---
 
@@ -14,8 +14,8 @@ If you Googled your way here because n8n is misbehaving — start with the [Top 
 
 | Resource | Where | What it is |
 |---|---|---|
-| **Top 10 Issues report** | [`docs/top-10-issues.html`](https://paulcertified.github.io/n8n-common-issues/top-10-issues.html) | A clustered analysis of ~210 forum threads from `community.n8n.io`, ranked by how often they show up as support tickets. |
-| **12-project build plan** | [`docs/projects.html`](https://paulcertified.github.io/n8n-common-issues/projects.html) · [`projects.md`](projects.md) | The companion plan: what to build to address every issue, mapped to JD requirements with a coverage matrix. |
+| **Top 10 Issues report** | [`docs/top-10-issues.html`](https://fullstackgoat.github.io/n8n-common-issues/top-10-issues.html) | A clustered analysis of ~210 forum threads from `community.n8n.io`, ranked by how often they show up as support tickets. |
+| **12-project build plan** | [`docs/projects.html`](https://fullstackgoat.github.io/n8n-common-issues/projects.html) · [`projects.md`](projects.md) | The companion plan: what to build to address every issue, mapped to JD requirements with a coverage matrix. |
 | **Reproductions** | [`repros/`](repros/) | One folder per ticket cluster. Each ships a `docker-compose.yml` that boots a clean stack reproducing the issue, plus root-cause and workaround docs. |
 | **Knowledge base** | [`kb/`](kb/) | Plain-English fix articles, one per issue. Format: *Symptoms → Confirm → Root cause → Fix → Prevent → Related threads.* |
 | **Debug CLI** | [`tools/debug-cli/`](tools/debug-cli/) | Small Node.js CLI for parsing n8n executions, testing webhooks, decoding OAuth tokens, and running network diagnostics. |
@@ -90,7 +90,7 @@ Designed so a customer can self-serve in under 90 seconds, or a support engineer
 
 ## Status
 
-This repo is being built in public. Tracking against the [12-project sprint plan](https://paulcertified.github.io/n8n-common-issues/projects.html):
+This repo is being built in public. Tracking against the [12-project sprint plan](https://fullstackgoat.github.io/n8n-common-issues/projects.html):
 
 - [x] Top 10 Issues report
 - [x] 12-project build plan
@@ -121,7 +121,7 @@ Found another issue that should be in here? Open an issue or a PR. The bar for i
 
 Issue rankings come from a Firecrawl scrape of `community.n8n.io` covering: latest *Questions*, all-time top *Questions*, top *Help me Build my Workflow*, top *Feature Requests*, and the `queue-mode`, `docker`, `webhook`, and `rag` tag pages. Threads are weighted by **count × views × replies**, then filtered through a Senior Support Engineer lens (reproducible, KB-able, customer-facing).
 
-The full methodology and links to every source thread are in [`docs/top-10-issues.html`](https://paulcertified.github.io/n8n-common-issues/top-10-issues.html).
+The full methodology and links to every source thread are in [`docs/top-10-issues.html`](https://fullstackgoat.github.io/n8n-common-issues/top-10-issues.html).
 
 ---
 
@@ -133,4 +133,4 @@ The full methodology and links to every source thread are in [`docs/top-10-issue
 
 ## Author
 
-**Paul Gipson** · [paulcertifiedx@gmail.com](mailto:paulcertifiedx@gmail.com) · [@PaulCertified](https://github.com/PaulCertified)
+**Paul Gipson** · [paulcertifiedx@gmail.com](mailto:paulcertifiedx@gmail.com) · [@fullstackgoat](https://github.com/fullstackgoat)
