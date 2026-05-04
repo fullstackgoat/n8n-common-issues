@@ -12,7 +12,7 @@ Plain-English fix articles, one per top-10 issue. Format is identical across all
 | 04 | Cron fires N times in queue mode / "Worker failed to find data" | ⏳ planned |
 | 05 | Webhook fires twice / production URL doesn't fire / provider keeps retrying | ⏳ planned |
 | 06 | RAG returns empty / wrong dimension / "tool input did not match schema" | ⏳ planned |
-| 07 | Loop only processes first item / "Input values have N keys" | ⏳ planned |
+| 07 | [Loop only processes first item / "Input values have N keys"](07-loops.md) | ✅ done |
 | 08 | HTTP Request ECONNREFUSED / can't reach Ollama / proxy errors | ⏳ planned |
 | 09 | Workflow crashes on large SQL / AI Agent slow / RAM never released | ⏳ planned |
 | 10 | Node X stopped working after upgrade / regression in version Y | ⏳ planned |

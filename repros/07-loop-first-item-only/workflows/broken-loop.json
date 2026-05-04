@@ -1,0 +1,125 @@
+{
+  "name": "Repro 07 — Loop \"first item only\" (BROKEN)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## REPRO 07 — Loop \"first item only\" (BROKEN)\n\n**How to use this workflow**\n\n1. Click the **Test workflow** button at the bottom of the canvas.\n2. Open each node's output in order:\n   - `Generate 5 Leads` → output: **5 items** ✓\n   - `Process Lead (BUG)` → output: **1 item** ✗ ← the bug surfaces here\n   - `Mark as Synced` → output: 1 item\n\n---\n\n### Why only one item makes it through\n\nThe Code node `Process Lead (BUG)` is doing this:\n\n```js\nconst items = $input.all();\nconst lead  = items[0].json;   // ← only the first lead\nreturn [{ json: lead }];\n```\n\nIt **looks** like it's processing \"the current lead,\" but it's hard-coding `items[0]`. n8n is iterating fine — the bug is inside the Code node, and it silently drops 4 of 5 leads.\n\n---\n\n### The wrong fix everyone tries first\n\nWrap `Process Lead (BUG)` inside a **Loop Over Items** node and reconnect.\n\nGo ahead and try it. The loop fires 5 times, but each iteration still returns `items[0]` of the batch — so you end up with the same single-item output. The Loop Over Items node is doing its job; the Code node is the broken link.\n\n---\n\n### The real fix\n\nTwo valid patterns, both shown in `workflows/fixed-loop.json` (next to this file):\n\n- **Pattern A — `items.map()`:** stay in *Run Once for All Items* mode, return one item per input.\n- **Pattern B — Run Once for Each Item:** switch the Code node mode and use `$input.item.json` instead of `$input.all()[0].json`.",
+        "height": 620,
+        "width": 520
+      },
+      "id": "1d4f8c0a-7e11-4b8e-9c8f-aa11bb22cc01",
+      "name": "How to use this workflow",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-160, -260]
+    },
+    {
+      "parameters": {},
+      "id": "2a5b9c1d-8f22-4e3a-b1c2-dd33ee44ff02",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Synthesize 5 leads — pretend these arrived from a CRM webhook.\n// This node is not the bug. It outputs 5 items, exactly as expected.\n\nreturn [\n  { json: { id: 1, name: \"Acme Corp\",         email: \"founder@acme.test\",   country: \"US\" } },\n  { json: { id: 2, name: \"Globex Industries\", email: \"ops@globex.test\",     country: \"DE\" } },\n  { json: { id: 3, name: \"Initech Systems\",   email: \"it@initech.test\",     country: \"CA\" } },\n  { json: { id: 4, name: \"Umbrella Ltd\",      email: \"biz@umbrella.test\",   country: \"UK\" } },\n  { json: { id: 5, name: \"Hooli Holdings\",    email: \"people@hooli.test\",   country: \"US\" } }\n];\n"
+      },
+      "id": "3b6c0d2e-9033-4f4b-c2d3-ee44ff5500a3",
+      "name": "Generate 5 Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────\n// BUG: this Code node only ever processes the FIRST item.\n//\n//   $input.all() returns every item from the previous node (5 leads),\n//   but we grab items[0] and return just that — so 4 leads silently\n//   disappear.\n//\n//   At a glance, this looks like it's processing \"the current lead.\"\n//   It's not — it's hard-coding the first one.\n//\n//   You will see this same shape on the n8n forum constantly:\n//     const lead = $input.first().json;\n//     const lead = items[0].json;\n//     const lead = $json;          // (in 'Run Once for All Items' mode\n//                                  //   $json is also items[0] — same trap)\n//\n// HOW TO SEE THE BUG:\n//   1. Run the workflow with the \"Test workflow\" button.\n//   2. Click this node — the output panel shows 1 item, not 5.\n//   3. Compare with the upstream node \"Generate 5 Leads\" — 5 items.\n// ─────────────────────────────────────────────────────────────\n\nconst items = $input.all();\nconst lead  = items[0].json;   // ← THE BUG\n\nlead.processedAt = new Date().toISOString();\nlead.status      = \"processed\";\n\nreturn [{ json: lead }];\n"
+      },
+      "id": "4c7d1e3f-a044-5a5c-d3e4-ff5500661b04",
+      "name": "Process Lead (BUG)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 420]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5d8e2f4a-b155-6b6d-e4f5-006611772c05",
+              "name": "synced",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "6e9f3a5b-c266-7c7e-f506-117722883d06",
+              "name": "syncedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "7faab4c6-d377-8d8f-a617-228833994e07",
+      "name": "Mark as Synced",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 420]
+    },
+    {
+      "parameters": {
+        "content": "### What you should observe\n\nAfter clicking **Test workflow**:\n\n| Node | Items out | Note |\n|---|---|---|\n| Generate 5 Leads | **5** | Acme, Globex, Initech, Umbrella, Hooli |\n| Process Lead (BUG) | **1** | only Acme makes it through |\n| Mark as Synced | **1** | downstream effect on a single lead |\n\nIf you saw 1 item where you expected 5, you've reproduced the bug.\n\nNext: open the Code node in `Process Lead (BUG)`, read the inline comments, then look at `fixed-loop.json` for the two-line correction.",
+        "height": 320,
+        "width": 480
+      },
+      "id": "8a0bb5d7-e488-9e9a-b728-339944aa5f08",
+      "name": "What to observe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [400, 660]
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Generate 5 Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate 5 Leads": {
+      "main": [
+        [
+          {
+            "node": "Process Lead (BUG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Lead (BUG)": {
+      "main": [
+        [
+          {
+            "node": "Mark as Synced",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

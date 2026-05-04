@@ -1,0 +1,203 @@
+{
+  "name": "Repro 07 — Loop \"first item only\" (FIXED — two patterns)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## REPRO 07 — Loop \"first item only\" (FIXED)\n\nThis is the side-by-side companion to `broken-loop.json`.\n\nThe trigger generates **5 leads**, then the data fans out into **two parallel branches** — each one is a valid fix for the bug in `broken-loop.json`. Both branches should output **5 items**.\n\n---\n\n### Pattern A (top branch) — `Run Once for All Items` + `items.map()`\n\nKeep the Code node in its **default** mode (Run Once for All Items). Process every item explicitly:\n\n```js\nreturn $input.all().map(item => ({\n  json: {\n    ...item.json,\n    processedAt: new Date().toISOString(),\n    status: \"processed\"\n  }\n}));\n```\n\n**When to use:** when you want to think in terms of \"the whole batch,\" do bulk transforms, deduplicate across items, or collapse N inputs into M outputs.\n\n---\n\n### Pattern B (bottom branch) — `Run Once for Each Item` mode\n\nFlip the Code node's **mode** dropdown to *Run Once for Each Item*. Now the code runs once per input item and `$input.item` is the current one:\n\n```js\nconst lead = $input.item.json;\nreturn {\n  json: {\n    ...lead,\n    processedAt: new Date().toISOString(),\n    status: \"processed\"\n  }\n};\n```\n\nNote: returns a **single object**, not an array. The mode handles iteration.\n\n**When to use:** when you genuinely want per-item logic and a 1-to-1 mapping. Easier to read; slightly slower at high item counts.\n\n---\n\n### What you should *not* need\n\nA `Loop Over Items` node. Both patterns fix the bug without one. n8n already iterates downstream of any multi-item source — the Code node was the broken link, not the iteration model.",
+        "height": 720,
+        "width": 540
+      },
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-001122334455",
+      "name": "About this workflow",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, -300]
+    },
+    {
+      "parameters": {},
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-112233445566",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Same input as broken-loop.json — 5 leads, no surprises here.\n// Compare against the broken workflow side-by-side.\n\nreturn [\n  { json: { id: 1, name: \"Acme Corp\",         email: \"founder@acme.test\",   country: \"US\" } },\n  { json: { id: 2, name: \"Globex Industries\", email: \"ops@globex.test\",     country: \"DE\" } },\n  { json: { id: 3, name: \"Initech Systems\",   email: \"it@initech.test\",     country: \"CA\" } },\n  { json: { id: 4, name: \"Umbrella Ltd\",      email: \"biz@umbrella.test\",   country: \"UK\" } },\n  { json: { id: 5, name: \"Hooli Holdings\",    email: \"people@hooli.test\",   country: \"US\" } }\n];\n"
+      },
+      "id": "c3d4e5f6-a7b8-4c9d-0e1f-223344556677",
+      "name": "Generate 5 Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────────────────────\n// FIX — Pattern A: Run Once for All Items + items.map()\n//\n// This Code node is in the DEFAULT mode (\"Run Once for All Items\").\n// $input.all() returns every input item, and we map over all of them\n// instead of grabbing items[0]. One output item per input item.\n//\n// Compare with broken-loop.json's Code node, which did:\n//   const lead = items[0].json;\n//   return [{ json: lead }];\n//\n// The difference is two characters: items[0] → items.map().\n//\n// HOW TO VERIFY:\n//   1. Run the workflow.\n//   2. Click this node — output panel should show 5 items.\n// ─────────────────────────────────────────────────────────────\n\nreturn $input.all().map(item => ({\n  json: {\n    ...item.json,\n    processedAt: new Date().toISOString(),\n    status: \"processed\"\n  }\n}));\n"
+      },
+      "id": "d4e5f6a7-b8c9-4d0e-1f20-334455667788",
+      "name": "Process Lead (FIX A — items.map)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 320]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e5f6a7b8-c9d0-4e1f-2031-445566778899",
+              "name": "synced",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "f6a7b8c9-d0e1-4f20-3142-5566778899aa",
+              "name": "syncedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "07a8b9c0-d1e2-4031-4253-66778899aabb",
+      "name": "Mark as Synced (A)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 320]
+    },
+    {
+      "parameters": {
+        "content": "### Pattern A — `items.map()`\n\n**Mode:** Run Once for All Items *(default)*\n**Returns:** an array of items\n\n```js\nreturn $input.all().map(item => ({\n  json: { ...item.json, /* ... */ }\n}));\n```\n\nUse when you're thinking in batches: bulk transforms, dedup, fan-in, fan-out.",
+        "height": 260,
+        "width": 360
+      },
+      "id": "18b9c0d1-e2f3-4142-5364-778899aabbcc",
+      "name": "Pattern A note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1140, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// ─────────────────────────────────────────────────────────────\n// FIX — Pattern B: Run Once for Each Item mode\n//\n// This Code node has its MODE dropdown set to \"Run Once for Each Item\"\n// (visible at the top of the node's parameters panel).\n//\n// In this mode:\n//   - The code body runs ONCE PER INPUT ITEM.\n//   - $input.item is the current item — no array indexing.\n//   - You return a SINGLE object, not an array.\n//\n// This is often the most readable fix when you genuinely want\n// per-item logic and a 1-to-1 mapping.\n//\n// HOW TO VERIFY:\n//   1. Run the workflow.\n//   2. Click this node — output panel should show 5 items.\n//   3. Click the \"Mode\" dropdown at the top of the parameters\n//      panel to see this is set to \"Run Once for Each Item.\"\n// ─────────────────────────────────────────────────────────────\n\nconst lead = $input.item.json;\n\nreturn {\n  json: {\n    ...lead,\n    processedAt: new Date().toISOString(),\n    status: \"processed\"\n  }\n};\n"
+      },
+      "id": "29c0d1e2-f3a4-4253-6475-8899aabbccdd",
+      "name": "Process Lead (FIX B — runOnceForEachItem)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 660]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3ad1e2f3-a4b5-4364-7586-99aabbccddee",
+              "name": "synced",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "4be2f3a4-b5c6-4475-8697-aabbccddeeff",
+              "name": "syncedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "5cf3a4b5-c6d7-4586-97a8-bbccddeeff00",
+      "name": "Mark as Synced (B)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 660]
+    },
+    {
+      "parameters": {
+        "content": "### Pattern B — Run Once for Each Item\n\n**Mode:** Run Once for Each Item\n**Returns:** a single object *(not an array)*\n\n```js\nconst lead = $input.item.json;\nreturn { json: { ...lead, /* ... */ } };\n```\n\nUse when you want clean per-item logic and a strict 1-to-1 mapping. Slightly slower at high item counts.",
+        "height": 260,
+        "width": 360
+      },
+      "id": "6da4b5c6-d7e8-4697-a8b9-ccddeeff0011",
+      "name": "Pattern B note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1140, 580]
+    },
+    {
+      "parameters": {
+        "content": "### What you should observe\n\nAfter clicking **Test workflow**, both branches should run in parallel:\n\n| Node | Items out | ✓/✗ |\n|---|---|---|\n| Generate 5 Leads | **5** | ✓ |\n| Process Lead (FIX A — items.map) | **5** | ✓ fix works |\n| Process Lead (FIX B — runOnceForEachItem) | **5** | ✓ fix works |\n| Mark as Synced (A) | **5** | ✓ all leads synced |\n| Mark as Synced (B) | **5** | ✓ all leads synced |\n\nIf both branches show 5 items at every node, you've confirmed both fixes work and you understand the items model.\n\n---\n\n### One last check\n\nOpen `Process Lead (FIX B — runOnceForEachItem)` and look at the **Mode** dropdown at the top of the parameters panel. It says **Run Once for Each Item** — that's the only structural difference from Pattern A. The code body is shorter because the iteration is implicit.",
+        "height": 480,
+        "width": 660
+      },
+      "id": "7eb5c6d7-e8f9-47a8-b9ca-ddeeff001122",
+      "name": "What to observe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 880]
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Generate 5 Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate 5 Leads": {
+      "main": [
+        [
+          {
+            "node": "Process Lead (FIX A — items.map)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Process Lead (FIX B — runOnceForEachItem)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Lead (FIX A — items.map)": {
+      "main": [
+        [
+          {
+            "node": "Mark as Synced (A)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Lead (FIX B — runOnceForEachItem)": {
+      "main": [
+        [
+          {
+            "node": "Mark as Synced (B)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

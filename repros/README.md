@@ -21,7 +21,7 @@ docker compose up -d
 | 04 | [Queue mode ghost triggers](04-queue-mode-ghost-triggers/) | ⏳ planned |
 | 05 | [Webhook double-trigger / idempotency](05-webhook-double-trigger/) | ⏳ planned |
 | 06 | [RAG vector dimension mismatch](06-rag-vector-dimensions/) | ⏳ planned |
-| 07 | [Loop only processes first item](07-loop-first-item-only/) | ⏳ planned |
+| 07 | [Loop only processes first item](07-loop-first-item-only/) | ✅ done |
 | 08 | [HTTP Request ECONNREFUSED](08-http-econnrefused/) | ⏳ planned |
 | 09 | [Memory overflow on large SQL](09-memory-overflow-large-sql/) | ⏳ planned |
 | 10 | [Snowflake Insert regression](10-node-regression-snowflake/) | ⏳ planned |

@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Build Order — The 9 Remaining Repros (Project 1)</title>
+<meta name="description" content="The exact order to build the 9 remaining reproductions inside the n8n-repro-lab. For each: the problem we're solving and the solution we're shipping." />
+<style>
+  :root {
+    --ink:        #1c1a17;
+    --ink-soft:   #4a443d;
+    --ink-faint:  #7a7368;
+    --rule:       #e7e2da;
+    --paper:      #f6f1e8;
+    --paper-2:    #efe7d8;
+    --accent:     #b14b2c;
+    --accent-2:   #6c7a3a;
+    --tag-bg:     #ece4d3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Charter', 'Georgia', 'Times New Roman', serif;
+    line-height: 1.55;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono, code, kbd, .meta, .badge, .nav, .eyebrow { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+  a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+  a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 56px 28px 96px; }
+
+  /* nav */
+  .nav { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); border-bottom: 1px solid var(--rule); padding-bottom: 18px; margin-bottom: 56px; }
+  .nav strong { color: var(--ink); letter-spacing: 0.18em; }
+  .nav a { text-decoration: none; }
+  .nav a:hover { color: var(--accent); }
+
+  /* hero */
+  .eyebrow { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; margin: 0 0 24px; letter-spacing: -0.01em; font-weight: 700; }
+  .lede { font-size: 19px; color: var(--ink-soft); max-width: 70ch; }
+  .lede strong { color: var(--ink); }
+
+  /* meta strip */
+  .meta-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin: 48px 0 56px; }
+  .meta-strip > div { padding: 18px 24px 18px 0; border-right: 1px solid var(--rule); }
+  .meta-strip > div:last-child { border-right: none; padding-right: 0; }
+  .meta-label { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .meta-value { font-size: 22px; font-weight: 700; }
+  .meta-value .small { font-size: 14px; color: var(--ink-faint); font-weight: 400; }
+
+  /* section markers */
+  h2 { font-size: 28px; letter-spacing: -0.005em; margin: 8px 0 8px; }
+  .section-rule { color: var(--ink-faint); font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; border-top: 1px solid var(--rule); padding-top: 14px; margin-top: 72px; }
+  .section-intro { color: var(--ink-soft); max-width: 70ch; margin-top: 0; }
+
+  /* glance table */
+  .table-wrap { overflow-x: auto; margin: 20px 0 0; }
+  table.glance { width: 100%; border-collapse: collapse; font-family: ui-monospace, monospace; font-size: 13px; }
+  table.glance th, table.glance td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+  table.glance th { color: var(--ink-faint); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  table.glance td.num { font-weight: 700; color: var(--accent); width: 48px; text-align: center; }
+  table.glance td.repro { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  table.glance td.title { font-family: 'Iowan Old Style', 'Charter', 'Georgia', serif; font-size: 15px; color: var(--ink); }
+  table.glance td.eff { color: var(--ink-soft); white-space: nowrap; }
+  table.glance td.day { color: var(--ink-faint); white-space: nowrap; }
+  table.glance tr.wave-row td { background: var(--paper-2); color: var(--ink-faint); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; padding: 8px 14px; font-weight: 600; }
+
+  /* repro card */
+  .repros { border-top: 1px solid var(--rule); margin-top: 16px; }
+  .repro { display: grid; grid-template-columns: 130px 1fr; gap: 32px; padding: 44px 0; border-bottom: 1px solid var(--rule); }
+  .repro .id { padding-top: 6px; }
+  .repro .id .ord { font-family: ui-monospace, monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .repro .id .num { font-family: ui-monospace, monospace; font-weight: 700; font-size: 44px; color: var(--accent); line-height: 1; letter-spacing: -0.02em; }
+  .repro .id .pill { display: inline-block; margin-top: 14px; padding: 4px 10px; background: var(--ink); color: var(--paper); font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .repro .id .pill.wave1 { background: var(--accent-2); }
+  .repro .id .pill.wave2 { background: var(--accent); }
+  .repro .id .pill.wave3 { background: var(--ink); }
+  .repro .id .pill.wave4 { background: #6b4a87; }
+  .repro .id .effort { display: block; margin-top: 10px; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; }
+
+  .repro h3 { font-size: 24px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.005em; }
+  .repro .sub { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 22px; }
+
+  .ps { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--rule); margin: 4px 0 18px; }
+  .ps > div { padding: 20px 22px 22px; }
+  .ps .problem { background: var(--paper); border-right: 1px solid var(--rule); }
+  .ps .solution { background: var(--paper-2); }
+  .ps h4 { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 600; }
+  .ps .problem h4 { color: var(--accent); }
+  .ps .solution h4 { color: var(--accent-2); }
+  .ps p { margin: 0 0 8px; color: var(--ink-soft); font-size: 15.5px; line-height: 1.55; }
+  .ps p:last-child { margin-bottom: 0; }
+  .ps strong { color: var(--ink); }
+  .ps ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-soft); font-size: 14.5px; }
+  .ps ul li { margin: 4px 0; }
+
+  .stack { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 6px; }
+  .stack h4 { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 8px; font-weight: 600; }
+  .stack p, .stack ul { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+  .stack ul { padding-left: 18px; }
+  .stack ul li { margin: 3px 0; }
+  .stack code { background: var(--paper-2); padding: 1px 6px; font-size: 13.5px; border: 1px solid var(--rule); }
+
+  /* close-out callout */
+  .doneblock { background: var(--paper-2); border: 1px solid var(--rule); padding: 26px 30px; margin: 24px 0 0; }
+  .doneblock h3 { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px; font-weight: 600; }
+  .doneblock ol { margin: 0; padding-left: 22px; color: var(--ink-soft); font-size: 15.5px; }
+  .doneblock ol li { margin: 6px 0; }
+  .doneblock ol li strong { color: var(--ink); }
+
+  footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--ink-faint); font-size: 13px; }
+
+  @media (max-width: 740px) {
+    .meta-strip { grid-template-columns: repeat(2, 1fr); }
+    .meta-strip > div { border-right: none; border-bottom: 1px solid var(--rule); }
+    .repro { grid-template-columns: 1fr; gap: 14px; }
+    .repro .id { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; }
+    .repro .id .num { font-size: 32px; }
+    .repro .id .pill, .repro .id .effort { margin-top: 0; }
+    .ps { grid-template-columns: 1fr; }
+    .ps .problem { border-right: none; border-bottom: 1px solid var(--rule); }
+    .stack { grid-template-columns: 1fr; gap: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="nav">
+    <span><strong>Build Order</strong> &nbsp;·&nbsp; companion to <a href="projects.html">projects.html</a> · <a href="top-10-issues.html">top-10-issues.html</a></span>
+    <span>Project 01 · v1 · May 2026</span>
+  </div>
+
+  <div class="eyebrow">Project 01 &middot; The repro lab &middot; Build queue</div>
+  <h1>9 reproductions left to ship &mdash; in exact build order.</h1>
+  <p class="lede">
+    Repro 01 (Webhook URL) is done and sets the pattern. The other nine still need building.
+    Below: the order to tackle them, the <strong>problem</strong> each one is solving on the customer's side, and the <strong>solution</strong> &mdash; the actual artifacts we're shipping for each.
+    Order is taken straight from the <a href="../build-project1.md">daily kanban in <code>build-project1.md</code></a>; sequenced for momentum (easy first) before escalating to the production-complexity repros.
+  </p>
+
+  <div class="meta-strip">
+    <div>
+      <div class="meta-label">Done</div>
+      <div class="meta-value">1<span class="small">&nbsp;/&nbsp;10</span></div>
+    </div>
+    <div>
+      <div class="meta-label">Remaining</div>
+      <div class="meta-value">9</div>
+    </div>
+    <div>
+      <div class="meta-label">Build window</div>
+      <div class="meta-value">7 days</div>
+    </div>
+    <div>
+      <div class="meta-label">Effort budget</div>
+      <div class="meta-value">~29h</div>
+    </div>
+  </div>
+
+  <div class="section-rule">01 &nbsp;/&nbsp; The order at a glance</div>
+  <h2>Read top to bottom &mdash; that's the order.</h2>
+  <p class="section-intro">Wave 1 is three easy wins to prove the template scales. Wave 2 hits the JD-core auth + webhook scenarios. Wave 3 is the production-complexity work (queue mode + memory). Wave 4 closes out with AI/RAG and the regression triage tooling.</p>
+
+  <div class="table-wrap">
+    <table class="glance">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Repro</th>
+          <th>Title</th>
+          <th>Effort</th>
+          <th>Day</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="wave-row"><td colspan="5">Wave 1 &middot; Foundation &middot; Days 1&ndash;3</td></tr>
+        <tr><td class="num">1</td><td class="repro">Repro 07</td><td class="title">Loop "first item only"</td><td class="eff">~2h</td><td class="day">Day 1</td></tr>
+        <tr><td class="num">2</td><td class="repro">Repro 03</td><td class="title">Docker persistence &amp; encryption-key drift</td><td class="eff">~3h</td><td class="day">Day 2</td></tr>
+        <tr><td class="num">3</td><td class="repro">Repro 08</td><td class="title">HTTP <code>ECONNREFUSED</code> from inside the container</td><td class="eff">~3h</td><td class="day">Day 3</td></tr>
+        <tr class="wave-row"><td colspan="5">Wave 2 &middot; Core JD coverage &middot; Days 4&ndash;5</td></tr>
+        <tr><td class="num">4</td><td class="repro">Repro 02</td><td class="title">OAuth callback URL mismatch &amp; refresh-token expiry</td><td class="eff">~4h</td><td class="day">Day 4</td></tr>
+        <tr><td class="num">5</td><td class="repro">Repro 05</td><td class="title">Webhook double-trigger from provider retries</td><td class="eff">~3h</td><td class="day">Day 5</td></tr>
+        <tr class="wave-row"><td colspan="5">Wave 3 &middot; Production complexity &middot; Day 6 + Day 7 AM</td></tr>
+        <tr><td class="num">6</td><td class="repro">Repro 04</td><td class="title">Queue-mode "ghost trigger" duplicates</td><td class="eff">~5h</td><td class="day">Day 6</td></tr>
+        <tr><td class="num">7</td><td class="repro">Repro 09</td><td class="title">Memory overflow on large SQL result sets</td><td class="eff">~3h</td><td class="day">Day 7 AM</td></tr>
+        <tr class="wave-row"><td colspan="5">Wave 4 &middot; AI &amp; close-out &middot; Day 7</td></tr>
+        <tr><td class="num">8</td><td class="repro">Repro 06</td><td class="title">RAG vector dimensions &amp; chunking failures</td><td class="eff">~4h</td><td class="day">Day 7 PM</td></tr>
+        <tr><td class="num">9</td><td class="repro">Repro 10</td><td class="title">Snowflake / provider-node version regression</td><td class="eff">~2h</td><td class="day">Day 7 EVE</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-rule">02 &nbsp;/&nbsp; The 9 cards</div>
+  <h2>For each repro: the problem, then the solution.</h2>
+  <p class="section-intro">"Problem" is what a real customer is hitting on the forum. "Solution" is the concrete artifact this repro folder produces &mdash; what a future me, or a teammate, can clone and run on a clean machine to demonstrate the fix.</p>
+
+  <div class="repros">
+
+    <!-- 1 / Repro 07 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #1</div>
+        <div class="num">07</div>
+        <span class="pill wave1">Wave 1 &middot; Day 1</span>
+        <span class="effort">Budget ~2h</span>
+      </div>
+      <div>
+        <h3>Loop "first item only"</h3>
+        <div class="sub">Repros mental-model bug &middot; Pure workflow JSON, no infra</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>A customer wires up a workflow with five input items. Only the first item produces a downstream effect. They wrap the work in a "Loop Over Items" node &mdash; nothing changes. Then they hit <em>"Input values have 3 keys"</em> when calling a sub-workflow.</p>
+            <p>The bug isn't in n8n. The customer's mental model of how items flow is wrong: every node downstream of a multi-item source <strong>already loops</strong>. Wrapping it explicitly is a no-op.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>Three workflow JSONs that make the items model <strong>visible and falsifiable</strong> in under 5 minutes:</p>
+            <ul>
+              <li><code>broken-loop.json</code> &mdash; reproduces the "only first item works" symptom</li>
+              <li><code>fixed-loop.json</code> &mdash; same goal, correct topology, all 5 items hit</li>
+              <li><code>three-keys-error.json</code> &mdash; exact reproduction of the sub-workflow keys error</li>
+            </ul>
+            <p>Plus a <code>ROOT_CAUSE.md</code> that explains n8n's items / fan-out semantics in &lt;500 words with an ASCII or Mermaid diagram.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>Vanilla n8n, single container. No external dependencies &mdash; the value is in the workflow JSON and the explanation.</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>All 3 workflow JSONs export cleanly via n8n's UI</li>
+              <li>ROOT_CAUSE explains the items model with a diagram</li>
+              <li>Cites the n8n staff "improve Loop Over Items" forum thread</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 2 / Repro 03 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #2</div>
+        <div class="num">03</div>
+        <span class="pill wave1">Wave 1 &middot; Day 2</span>
+        <span class="effort">Budget ~3h</span>
+      </div>
+      <div>
+        <h3>Docker persistence &amp; encryption-key drift</h3>
+        <div class="sub">Two compose files &middot; Broken vs fixed</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer runs n8n in Docker, restarts the container, and finds their credentials are <strong>gone</strong> &mdash; or worse, present but unreadable ("decrypt failed"). Or they try to write a file from a workflow and get <code>EACCES</code>.</p>
+            <p>Three independent root causes converge on the same symptoms: no persistent volume, an unset <code>N8N_ENCRYPTION_KEY</code> that drifts every boot, and a UID mismatch between the container user and the host bind-mount owner.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>Two minimal compose files that demonstrate cause and fix side-by-side:</p>
+            <ul>
+              <li><code>docker-compose.yml</code> &mdash; bind-mounts to <code>/tmp/n8n-bad</code> with no UID hint, no encryption key, no healthcheck</li>
+              <li><code>docker-compose.fixed.yml</code> &mdash; named volume <code>n8n_data</code>, <code>N8N_ENCRYPTION_KEY</code> from <code>.env</code>, <code>user: "1000:1000"</code>, healthcheck</li>
+            </ul>
+            <p><code>WORKAROUND.md</code> includes the SQLite&nbsp;&rarr;&nbsp;Postgres migration one-liner using <code>pgloader</code> or n8n's CLI export.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n single node + a deliberately bad host bind-mount. <code>.env.example</code> ships <code>N8N_ENCRYPTION_KEY=$(openssl rand -hex 32)</code>.</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>Both stacks boot on a clean machine</li>
+              <li>Credential-loss step reproduces 100% of the time</li>
+              <li>SQLite&nbsp;&rarr;&nbsp;Postgres migration is documented &amp; tested</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 3 / Repro 08 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #3</div>
+        <div class="num">08</div>
+        <span class="pill wave1">Wave 1 &middot; Day 3</span>
+        <span class="effort">Budget ~3h</span>
+      </div>
+      <div>
+        <h3>HTTP <code>ECONNREFUSED</code> from inside the container</h3>
+        <div class="sub">Three sub-scenarios in one stack</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer's workflow calls <code>http://localhost:11434</code> for Ollama, an internal corporate API, or an HTTPS endpoint with a self-signed cert. They see <code>ECONNREFUSED</code>, <code>ETIMEDOUT</code>, or TLS errors and assume n8n is broken.</p>
+            <p>Three near-identical symptoms with three very different fixes: <code>localhost</code> inside a container is the container itself; corporate networks need <code>HTTP_PROXY</code>/<code>HTTPS_PROXY</code> exported into the n8n process; and self-signed certs need a CA bundle, not a flag.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>One compose stack with n8n + a fake corporate proxy (Squid) + a fake internal-only API. Three workflows isolate each scenario:</p>
+            <ul>
+              <li><code>1-ollama-localhost.json</code> &rarr; fix is <code>http://host.docker.internal:11434</code></li>
+              <li><code>2-corp-proxy.json</code> &rarr; fix is exporting <code>HTTP_PROXY</code> / <code>HTTPS_PROXY</code> on the n8n container</li>
+              <li><code>3-self-signed.json</code> &rarr; fix is mounting a CA bundle (with a giant warning about <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code>)</li>
+            </ul>
+            <p>Each scenario fails on <code>docker-compose.yml</code> and succeeds on <code>docker-compose.fixed.yml</code>.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n + Squid (proxy) + a tiny internal-API container. Workflows are pre-built; reader picks which one to import.</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>All three scenarios fail deterministically on the broken stack</li>
+              <li>All three succeed on the fixed stack</li>
+              <li>Copy-pasteable env-var blocks per scenario in <code>WORKAROUND.md</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 4 / Repro 02 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #4</div>
+        <div class="num">02</div>
+        <span class="pill wave2">Wave 2 &middot; Day 4</span>
+        <span class="effort">Budget ~4h</span>
+      </div>
+      <div>
+        <h3>OAuth callback URL mismatch &amp; refresh-token expiry</h3>
+        <div class="sub">Real OAuth dance against a mock IdP</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer registers an OAuth client at the provider with <code>https://workflows.example.com/...</code> as the callback. n8n boots with default config and emits <code>localhost:5678/...</code>. The OAuth dance technically completes &mdash; and then redirects nowhere useful, leaving the user staring at a blank tab.</p>
+            <p>Or: they get OAuth working, then the next workflow run after an hour fails with <code>invalid_token</code>. They never wired up refresh.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>Two compose stacks that run a <strong>real OAuth flow</strong> end-to-end against a containerised mock IdP &mdash; no third-party dependency:</p>
+            <ul>
+              <li>Scenario 1: callback-URL mismatch reproduced and fixed via correct <code>WEBHOOK_URL</code> + IdP client config</li>
+              <li>Scenario 2: mock IdP issues a 60-second token; the next run after expiry fails; <code>WORKAROUND.md</code> shows how to detect and refresh</li>
+            </ul>
+            <p><code>WORKAROUND.md</code> also covers the <code>allowedDomains</code> Public-API gotcha and ngrok-specific guidance.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n + <a href="https://github.com/navikt/mock-oauth2-server">navikt/mock-oauth2-server</a> (or Keycloak). Both stacks share the same IdP container; only the n8n config differs.</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>OAuth dance completes end-to-end on the fixed stack</li>
+              <li>Refresh-token expiry is reproducible by waiting 60s</li>
+              <li><code>allowedDomains</code> + ngrok gotchas documented</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 5 / Repro 05 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #5</div>
+        <div class="num">05</div>
+        <span class="pill wave2">Wave 2 &middot; Day 5</span>
+        <span class="effort">Budget ~3h</span>
+      </div>
+      <div>
+        <h3>Webhook double-trigger from provider retries</h3>
+        <div class="sub">Custom <code>flaky-provider</code> container</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer's webhook works fine until traffic goes up. Then the same lead shows up <strong>three times</strong> in their CRM. Their workflow is "correct" &mdash; the upstream provider is just retrying on slow responses, and without an idempotency key every retry creates a new record.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>A tiny <code>flaky-provider</code> Node container that simulates real provider semantics: 3 retries with exponential backoff, same payload each time, optional <code>--slow</code> flag to force n8n to take 10s and trigger the retry path.</p>
+            <p>Two workflows make the fix obvious by contrast:</p>
+            <ul>
+              <li><code>non-idempotent.json</code> &rarr; 3 retries, 3 leads created</li>
+              <li><code>idempotent.json</code> &rarr; Set + If + Postgres dedupe table keyed on the provider's request-id header. 3 retries, 1 lead.</li>
+            </ul>
+            <p><code>WORKAROUND.md</code> covers all four common patterns: request-id dedupe, content hash, optimistic upsert, transactional outbox.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n + Postgres + custom <code>flaky-provider</code> Node container (Dockerfile + <code>server.js</code> in the repro folder).</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li><code>flaky-provider</code> reliably triggers retries</li>
+              <li>Non-idempotent flow double-effects 100% of the time</li>
+              <li>Idempotent flow correctly deduplicates</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 6 / Repro 04 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #6</div>
+        <div class="num">04</div>
+        <span class="pill wave3">Wave 3 &middot; Day 6</span>
+        <span class="effort">Budget ~5h &middot; Hardest</span>
+      </div>
+      <div>
+        <h3>Queue-mode "ghost trigger" duplicates</h3>
+        <div class="sub">Main + 2 workers + Redis + Postgres</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer scales to queue mode for performance. Their cron-triggered workflow now fires <strong>three times per tick</strong> instead of once, because the trigger registered on every worker instead of only on the main process. Race conditions are non-deterministic by definition, so the customer also can't get a consistent repro on their side &mdash; they just see duplicates and start blaming n8n.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>Two compose configurations that make this race condition <strong>100% reproducible within ~60 seconds</strong>:</p>
+            <ul>
+              <li><code>docker-compose.yml</code> &mdash; main + 2 workers, workers misconfigured to also load triggers. Cron every 30s &rarr; 3 inserts per tick.</li>
+              <li><code>docker-compose.fixed.yml</code> &mdash; same stack, workers correctly configured (no production-main on workers, active workflows disabled on workers). 1 insert per tick.</li>
+            </ul>
+            <p>Cron + a single Postgres <code>INSERT</code> node is the proof &mdash; reader counts rows in the <code>events</code> table.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n main + 2 workers + Redis (queue) + Postgres (data &amp; events table seeded by <code>postgres-init.sql</code>).</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>Bug reproduces 100% of the time within ~60s</li>
+              <li>Fix eliminates duplicates verifiably (count = 1 per tick)</li>
+              <li>ROOT_CAUSE cites the specific n8n version where the race was introduced</li>
+              <li>"Isolate workflows to dedicated workers" pattern documented</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 7 / Repro 09 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #7</div>
+        <div class="num">09</div>
+        <span class="pill wave3">Wave 3 &middot; Day 7 AM</span>
+        <span class="effort">Budget ~3h</span>
+      </div>
+      <div>
+        <h3>Memory overflow on large SQL result sets</h3>
+        <div class="sub">Naive vs streamed &middot; Same data, different fate</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer writes <code>SELECT * FROM big_table</code>, pipes the result into a Loop &rarr; HTTP node, and watches their container get OOM-killed at row ~30,000. They blame n8n; really they're just loading 50k rows into a single in-memory item.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>One compose stack with <code>mem_limit: 512m</code> on n8n and a Postgres seeded with 50,000 synthetic rows. Two workflows demonstrate the difference:</p>
+            <ul>
+              <li><code>naive.json</code> &mdash; <code>SELECT *</code>, OOM-killed within ~30s, watch <code>docker stats</code> climb</li>
+              <li><code>streamed.json</code> &mdash; chunked <code>LIMIT 500 OFFSET ${offset}</code> in a loop, RSS stays flat, completes successfully</li>
+            </ul>
+            <p><code>WORKAROUND.md</code> covers chunked SELECT, binary-data filesystem mode, <code>Loop Over Items</code> batch sizes, and <code>EXECUTIONS_DATA_SAVE_ON_*</code> tuning.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n (capped at 512MB) + Postgres seeded with 50k synthetic rows via <code>postgres-init.sql</code>.</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>OOM kill is reproducible &amp; visible in <code>docker stats</code></li>
+              <li>Streamed workflow completes; RSS stays flat</li>
+              <li>All four mitigation knobs documented</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 8 / Repro 06 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #8</div>
+        <div class="num">06</div>
+        <span class="pill wave4">Wave 4 &middot; Day 7 PM</span>
+        <span class="effort">Budget ~4h</span>
+      </div>
+      <div>
+        <h3>RAG vector dimensions &amp; chunking failures</h3>
+        <div class="sub">Three failure modes &middot; Tiny eval harness</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>Customer wires up "AI Agent + vector store + retriever" and reports "RAG isn't working." Useless to debug without ground truth &mdash; you can't eyeball whether retrieval is good. The three real failure modes are: dimension mismatch between embedding model and collection, embeddings node silently not firing on insert, and chunk sizes too small for meaningful context.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>A compose stack with n8n + Qdrant + a small known-good corpus (~50 markdown docs about cooking) + a tiny eval container that runs <strong>precision@k against fixed Q&amp;A pairs</strong> &mdash; turning "is RAG working?" into a green/red number in &lt;60s.</p>
+            <ul>
+              <li><code>1-dim-mismatch.json</code> &mdash; OpenAI embeddings (1536) into a Qdrant collection sized 192</li>
+              <li><code>2-no-embedding.json</code> &mdash; workflow looks correct but no embedding API calls fire on insert</li>
+              <li><code>3-bad-chunks.json</code> &mdash; <code>chunk_size=100</code> destroys context; fix is <code>500</code> with overlap <code>50</code></li>
+            </ul>
+            <p><code>WORKAROUND.md</code> doubles as the seed for the "RAG production checklist" deliverable in <a href="projects.html">Project 8</a>.</p>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>n8n + Qdrant + corpus folder + tiny Node eval container (RAGAS-style precision@k against <code>qa-pairs.json</code>).</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li>Eval harness produces a green/red score in &lt;60s</li>
+              <li>All three failure modes reproduce deterministically</li>
+              <li>Seeds the Project 8 RAG production checklist</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 9 / Repro 10 -->
+    <article class="repro">
+      <div class="id">
+        <div class="ord">Build #9</div>
+        <div class="num">10</div>
+        <span class="pill wave4">Wave 4 &middot; Day 7 EVE</span>
+        <span class="effort">Budget ~2h</span>
+      </div>
+      <div>
+        <h3>Snowflake / provider-node version regression</h3>
+        <div class="sub">Documentation + a generic triage script</div>
+        <div class="ps">
+          <div class="problem">
+            <h4>The problem</h4>
+            <p>n8n ships a minor version. Customer upgrades. The Snowflake Insert node (or Salesforce, or Gemini 3.0) now silently fails on payloads that worked yesterday. Hard to ship a literal repro because Snowflake needs paid credentials, and the bug is version-dependent &mdash; not a config error.</p>
+          </div>
+          <div class="solution">
+            <h4>The solution we're shipping</h4>
+            <p>This repro is intentionally documentation-heavy, but it ships a piece of <strong>tooling that pays dividends every future regression</strong>:</p>
+            <ul>
+              <li><code>REGRESSION_LOG.md</code> &mdash; documents at least 3 real regressions across recent versions (Snowflake, Salesforce, Gemini 3.0) with the version pair and the exact diff in behaviour</li>
+              <li><code>triage-script.sh</code> &mdash; pulls two adjacent n8n image tags, runs the same workflow against both via n8n's CLI execute mode, diffs the outputs. Generic &mdash; works for any future node regression.</li>
+              <li><code>WORKAROUND.md</code> &mdash; "how to roll back, and how to file a bug report n8n eng will love"</li>
+            </ul>
+          </div>
+        </div>
+        <div class="stack">
+          <div>
+            <h4>Stack</h4>
+            <p>Vanilla n8n with the version pinned by env var. No paid third-party services required.</p>
+          </div>
+          <div>
+            <h4>Done when</h4>
+            <ul>
+              <li><code>triage-script.sh</code> is general-purpose &mdash; not Snowflake-specific</li>
+              <li>3+ real regressions documented from forum threads</li>
+              <li>Bug-report template links to n8n's GitHub issue form</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="section-rule">03 &nbsp;/&nbsp; What "Project 1 done" looks like</div>
+  <h2>The bar to clear before tagging <code>v0.1.0-repros-complete</code></h2>
+  <p class="section-intro">Each individual repro must satisfy the 11-box acceptance checklist documented in <a href="../build-project1.md"><code>build-project1.md</code></a>. The <em>project</em> as a whole is shipped when:</p>
+
+  <div class="doneblock">
+    <h3>Definition of done</h3>
+    <ol>
+      <li><strong>All 10 repros</strong> have every acceptance-criteria box checked (README, broken &amp; fixed compose, <code>.env.example</code>, REPRO, ROOT_CAUSE, WORKAROUND, smoke test on a clean machine, KB cross-link, source-thread citations, teardown documented).</li>
+      <li><strong>Smoke pass on a fresh clone:</strong> clone to a new directory, run all 10 repros sequentially, all boot green.</li>
+      <li><strong>Each repro is cross-linked from a KB stub</strong> &mdash; full KB articles are Project 2; just the stub link counts here.</li>
+      <li><strong>Root <code>README.md</code></strong> status table shows the Repros line as ✅.</li>
+      <li><strong>Git tag <code>v0.1.0-repros-complete</code></strong> exists on <code>main</code>.</li>
+    </ol>
+  </div>
+
+  <p style="color: var(--ink-soft); margin-top: 28px;">
+    Once those five are true, Project 1 ships, and the next build queue is the 10 KB articles in <a href="projects.html">Project 2</a>. Each KB article is ~2 hours because the source content already exists inside the matching repro folder.
+  </p>
+
+  <footer>
+    Companion to <a href="projects.html">projects.html</a> and <a href="top-10-issues.html">top-10-issues.html</a>.
+    Source of truth for build state: <a href="../build-project1.md"><code>build-project1.md</code></a>.
+    Sourced from <a href="https://community.n8n.io/">community.n8n.io</a> via Firecrawl, May 2026.
+  </footer>
+
+</div>
+</body>
+</html>
