@@ -17,13 +17,13 @@
 | 05 | [Webhook double trigger](repros/05-webhook-double-trigger/) | ⏳ todo | Wave 2 |
 | 06 | [RAG vector dimensions](repros/06-rag-vector-dimensions/) | ⏳ todo | Wave 4 |
 | 07 | [Loop first item only](repros/07-loop-first-item-only/) | ✅ done | Wave 1 — second full reference. Three workflow JSONs + full docs + KB. |
-| 08 | [HTTP ECONNREFUSED](repros/08-http-econnrefused/) | ⏳ todo | Wave 1 |
+| 08 | [HTTP ECONNREFUSED](repros/08-http-econnrefused/) | ✅ done | Wave 1 — closes Wave 1. Three scenarios in one stack; smoke-tested end-to-end. |
 | 09 | [Memory overflow](repros/09-memory-overflow-large-sql/) | ⏳ todo | Wave 3 |
 | 10 | [Node regression — Snowflake](repros/10-node-regression-snowflake/) | ⏳ todo | Wave 4 |
 
-**Done count:** 3 / 10
+**Done count:** 4 / 10
 **Target completion:** Day 7 of the 14-day sprint
-**Cumulative effort burned:** ~5h on Repro 01 + ~2h on Repro 07 + ~3h on Repro 03 = ~10h
+**Cumulative effort burned:** ~5h on Repro 01 + ~2h on Repro 07 + ~3h on Repro 03 + ~3h on Repro 08 = ~13h. Wave 1 complete.
 
 ---
 
@@ -528,11 +528,11 @@ Check off as you ship. Each row = one work session.
 ### Day 2
 - [x] **AM:** Repro 03 — both compose files, .env.example
 - [x] **PM:** Repro 03 — REPRO, ROOT_CAUSE, WORKAROUND, smoke test
-- [ ] **Evening:** Repro 08 scaffolding (just folder + README)
+- [x] **Evening:** Repro 08 scaffolding — went well past "just folder + README"; full infra (broken + fixed compose, squid.conf, nginx-ssl.conf, .env.example, all 3 workflow JSONs) shipped. README also full version. Docs (REPRO/ROOT_CAUSE/WORKAROUND) and smoke test deferred to Day 3.
 
 ### Day 3
-- [ ] **AM:** Repro 08 — three scenarios, compose stacks
-- [ ] **PM:** Repro 08 — REPRO, ROOT_CAUSE, WORKAROUND
+- [x] **AM:** Repro 08 — three scenarios, compose stacks *(done early in Day 2 evening)*
+- [x] **PM:** Repro 08 — REPRO, ROOT_CAUSE, WORKAROUND, smoke test
 - [ ] **Evening:** Repro 02 scaffolding + read mock-oauth2-server docs
 
 ### Day 4
@@ -585,4 +585,5 @@ At that point, this file (`build-project1.md`) can be moved to `_archive/` or de
 - _2026-05-01:_ Repro 01 (webhook URL) shipped. ~5h. Pattern feels right; copying it for the rest.
 - _2026-05-04:_ Repro 07 (loops & "N keys" error) shipped. ~2h. Workflow-only repro — three importable JSONs (broken-loop, fixed-loop, three-keys-error) + full docs + KB article. Pattern from Repro 01 ports cleanly; the workflow-JSON-with-sticky-notes format works well for forum-style bugs that don't need a docker stack to reproduce. Also confirmed the ~2h budget is realistic when the bug is purely in workflow design.
 - _2026-05-04:_ Repro 03 (docker persistence) shipped. ~3h. Broken stack reproduces data loss in two commands (no volume + no encryption key + no healthcheck); fixed stack adds named volume, pinned `N8N_ENCRYPTION_KEY`, healthcheck, and explicit `user: "1000:1000"`. WORKAROUND.md covers the full SQLite → Postgres migration with the official `n8n export:credentials/workflow` CLI commands, plus per-platform notes (Linux / macOS / NAS / k8s). KB stub stays planned (Project 2). All three symptoms are deterministic — no flaky timing, no platform-specific gotchas in the core repro path. **Smoke-test passed end-to-end on Docker 29.4.1 / Compose v5.1.3:** broken stack → create owner+credential at `localhost:5678` → `docker compose down && up` → owner-setup screen returns (data gone, confirmed). Fixed stack → create owner+credential → `docker compose down && up` → owner account preserved, credential `repro-credential` still present and decryptable. Bonus evidence: broken stack `docker compose ps` shows `Up Xs` with no health column; fixed stack transitions `(health: starting)` → `(healthy)` at ~35s. Named volume `n8n-repro-03-docker-persistence-fixed_n8n_data` survives `down`, removed by `down -v`. All three symptoms reproduce 100%; all three fixes verified.
+- _2026-05-04 (evening):_ Repro 08 (HTTP ECONNREFUSED / proxy / self-signed) **shipped end-to-end.** ~3h total (~2h infra + ~1h docs and smoke-test). Folder has: full README; broken + fixed compose stacks (n8n + traefik/whoami × 2 as fake-ollama and internal-api + ubuntu/squid + alpine/openssl cert-init + nginx:alpine self-signed-server); two-network design (`public` for n8n+squid+fake-ollama+self-signed-nginx, `private` for squid+internal-api) so `internal-api` is unreachable from n8n without going through squid; squid.conf and nginx-ssl.conf; `.env.example`; all 3 workflow JSONs; full REPRO.md, ROOT_CAUSE.md, WORKAROUND.md (per-platform tables for Linux / Docker Desktop / k8s / rootless / NAS, decision tree for triage, `NODE_EXTRA_CA_CERTS` vs `NODE_TLS_REJECT_UNAUTHORIZED` guidance). Cert-init oneshot generates self-signed RSA cert into named `certs` volume on first boot — no keys committed. **Smoke-test passed end-to-end on Docker 29.4.1 / Compose v5.1.3 / macOS Docker Desktop:** broken stack → all three failures captured exactly: scenario 1A `connect ECONNREFUSED ::1:11434` (Node 22+ prefers IPv6 loopback — updated REPRO.md + ROOT_CAUSE.md to call this out); scenario 1B succeeded on macOS as predicted (Docker Desktop pre-populates host.docker.internal — REPRO.md gained a "works on my machine" trap callout); scenario 2 `getaddrinfo ENOTFOUND internal-api`; scenario 3 n8n's wrapped `NodeSslError: SSL Issue: consider using the 'Ignore SSL issues' option` (REPRO.md updated to use n8n's exact wording instead of raw Node error). Fixed stack: all three fixes verified wired-in via `docker exec` (`/etc/hosts` shows `192.168.65.254 host.docker.internal`; env shows `HTTP_PROXY=http://squid:3128 HTTPS_PROXY=... NO_PROXY=... NODE_EXTRA_CA_CERTS=/certs/server.crt`; `/certs/server.crt` mounted at 1237 bytes); all three workflows succeed in the editor. Wave 1 done.
 - _<date>:_ ...

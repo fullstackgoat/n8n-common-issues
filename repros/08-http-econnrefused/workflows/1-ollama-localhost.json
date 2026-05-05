@@ -1,0 +1,89 @@
+{
+  "name": "Repro 08 — Scenario 1: Ollama on the host (localhost vs host.docker.internal)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## REPRO 08 / Scenario 1 — \"Can't reach Ollama on my host\"\n\nThis workflow has two HTTP Request nodes that try to reach the same target via two different URLs. Run **Test workflow** and compare the outputs.\n\n### The target\n\nThe `fake-ollama` service (a `traefik/whoami` container) is listening on container port 80 and the compose file publishes it to the host on port 11434. So *from your laptop* you can `curl http://localhost:11434/` and get a response. That mirrors the user setup: \"Ollama is running on my Mac at `localhost:11434`.\"\n\n### The two URLs\n\n| Node | URL | Behaviour |\n|---|---|---|\n| `A — http://localhost:11434/` | `localhost` from inside the n8n container is the n8n container itself. Nothing is listening on port 11434 there. | **Always fails** with `ECONNREFUSED`, on both broken and fixed stacks. This is the canonical user mistake. |\n| `B — http://host.docker.internal:11434/` | `host.docker.internal` resolves to the Docker host's network — back to the published port and into `fake-ollama`. | **Fails on the broken stack** (no `extra_hosts` mapping → `ENOTFOUND`/`getaddrinfo`). **Succeeds on the fixed stack** (which adds `extra_hosts: [\"host.docker.internal:host-gateway\"]`). |\n\n### Why the fix is two parts\n\n1. **Infrastructure:** the n8n service needs `extra_hosts: [\"host.docker.internal:host-gateway\"]` (Linux only — Docker Desktop on macOS/Windows already has this). The `docker-compose.fixed.yml` in this folder has it.\n2. **Workflow:** the URL itself must change from `localhost` to `host.docker.internal`. Even with the env fix, node A above will still fail — `localhost` inside a container always means the container itself.\n\nThe forum thread *\"Unable to connect n8n to local Ollama instance — ECONNREFUSED\"* is exactly this confusion.",
+        "height": 600,
+        "width": 540
+      },
+      "id": "08010000-1111-2222-3333-444455556601",
+      "name": "About this scenario",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, -260]
+    },
+    {
+      "parameters": {},
+      "id": "08010000-1111-2222-3333-444455556602",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 360]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:11434/",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "08010000-1111-2222-3333-444455556603",
+      "name": "A — http://localhost:11434/",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 220],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:11434/",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "08010000-1111-2222-3333-444455556604",
+      "name": "B — http://host.docker.internal:11434/",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 500],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### What you should observe\n\n**On the broken stack (`docker-compose.yml`):**\n\n| Node | Result |\n|---|---|\n| A — `localhost` | ✗ `ECONNREFUSED` |\n| B — `host.docker.internal` | ✗ `getaddrinfo ENOTFOUND host.docker.internal` (Linux) |\n\n**On the fixed stack (`docker-compose.fixed.yml`):**\n\n| Node | Result |\n|---|---|\n| A — `localhost` | ✗ `ECONNREFUSED` (still wrong; `localhost` always means the n8n container itself) |\n| B — `host.docker.internal` | ✓ 200 OK, body shows `Hostname: <fake-ollama-container-id>` |\n\nThe shape of node A's failure proves the `localhost` URL itself is the problem — not the network config.",
+        "height": 380,
+        "width": 540
+      },
+      "id": "08010000-1111-2222-3333-444455556605",
+      "name": "What to observe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, 380]
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "A — http://localhost:11434/",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "B — http://host.docker.internal:11434/",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

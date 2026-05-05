@@ -1,0 +1,70 @@
+{
+  "name": "Repro 08 — Scenario 2: Internal API behind a corporate proxy",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## REPRO 08 / Scenario 2 — \"Workflow can't reach our internal API\"\n\nThis workflow has one HTTP Request node hitting `http://internal-api/`. The URL is **identical** between the broken and fixed stacks. Only the n8n container's environment differs.\n\n### The target\n\n`internal-api` is a `traefik/whoami` container on the `private` Docker network. The `squid` proxy container is on **both** networks (`public` and `private`), so it can reach `internal-api`. The n8n container is on `public` only — there's no Docker DNS path from n8n to `internal-api`.\n\nThis mirrors a real corporate setup: n8n is in a DMZ, the internal API is behind a firewall, and a forward proxy is the only allowed path.\n\n### Why it fails on the broken stack\n\n`docker-compose.yml` does not set `HTTP_PROXY` / `HTTPS_PROXY` on the n8n container. n8n's HTTP client tries to resolve `internal-api` directly via Docker's embedded DNS on the `public` network → no record → `ENOTFOUND`.\n\n### Why it works on the fixed stack\n\n`docker-compose.fixed.yml` sets:\n\n```yaml\nenvironment:\n  - HTTP_PROXY=http://squid:3128\n  - HTTPS_PROXY=http://squid:3128\n  - NO_PROXY=localhost,127.0.0.1,n8n,fake-ollama,...\n```\n\nNode.js' standard HTTP libraries respect these env vars (via `proxy-from-env` semantics). Outbound requests to `internal-api` are forwarded to `squid`, which IS on `private` and can resolve and reach the target.\n\n`NO_PROXY` excludes the names already on n8n's local network so they aren't unnecessarily round-tripped through the proxy.",
+        "height": 580,
+        "width": 540
+      },
+      "id": "08020000-1111-2222-3333-444455556601",
+      "name": "About this scenario",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, -260]
+    },
+    {
+      "parameters": {},
+      "id": "08020000-1111-2222-3333-444455556602",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 380]
+    },
+    {
+      "parameters": {
+        "url": "http://internal-api/",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "08020000-1111-2222-3333-444455556603",
+      "name": "GET http://internal-api/",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 380],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### What you should observe\n\n**On the broken stack (`docker-compose.yml`):**\n\n```\nError: getaddrinfo ENOTFOUND internal-api\n```\n\nor a connection-refused / timeout, depending on Node version. Either way, n8n cannot reach `internal-api` directly.\n\n**On the fixed stack (`docker-compose.fixed.yml`):**\n\n```\nHostname: <internal-api-container-id>\nIP: 172.x.x.x\n...request headers, including X-Forwarded-For from squid...\n```\n\n200 OK. The `traefik/whoami` body confirms the request reached `internal-api` via squid.\n\n### Verifying the proxy was actually used\n\nIn the response body, look for `X-Forwarded-For` and the `RemoteAddr`. The remote address will be `squid`'s IP, not n8n's — proof that the request was proxied, not direct.",
+        "height": 460,
+        "width": 540
+      },
+      "id": "08020000-1111-2222-3333-444455556604",
+      "name": "What to observe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, 360]
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "GET http://internal-api/",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

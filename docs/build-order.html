@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Build Order — The 7 Remaining Repros (Project 1)</title>
-<meta name="description" content="The exact order to build the 7 remaining reproductions inside the n8n-repro-lab. For each: the problem we're solving and the solution we're shipping." />
+<title>Build Order — The 6 Remaining Repros (Project 1)</title>
+<meta name="description" content="The exact order to build the 6 remaining reproductions inside the n8n-repro-lab. For each: the problem we're solving and the solution we're shipping." />
 <style>
   :root {
     --ink:        #1c1a17;
@@ -142,9 +142,10 @@
   </div>
 
   <div class="eyebrow">Project 01 &middot; The repro lab &middot; Build queue</div>
-  <h1>7 reproductions left to ship &mdash; in exact build order.</h1>
+  <h1>6 reproductions left to ship &mdash; Wave 1 complete.</h1>
   <p class="lede">
-    Repros 01 (Webhook URL), 07 (Loops), and 03 (Docker persistence) are done. The other seven still need building.
+    Repros 01 (Webhook URL), 07 (Loops), 03 (Docker persistence), and 08 (HTTP <code>ECONNREFUSED</code> / proxies / self-signed certs) are done &mdash; Wave 1 is closed.
+    The other six still need building.
     Below: the order to tackle them, the <strong>problem</strong> each one is solving on the customer's side, and the <strong>solution</strong> &mdash; the actual artifacts we're shipping for each.
     Order is taken straight from the <a href="../build-project1.md">daily kanban in <code>build-project1.md</code></a>; sequenced for momentum (easy first) before escalating to the production-complexity repros.
   </p>
@@ -152,11 +153,11 @@
   <div class="meta-strip">
     <div>
       <div class="meta-label">Done</div>
-      <div class="meta-value">3<span class="small">&nbsp;/&nbsp;10</span></div>
+      <div class="meta-value">4<span class="small">&nbsp;/&nbsp;10</span></div>
     </div>
     <div>
       <div class="meta-label">Remaining</div>
-      <div class="meta-value">7</div>
+      <div class="meta-value">6</div>
     </div>
     <div>
       <div class="meta-label">Build window</div>
@@ -187,7 +188,7 @@
         <tr class="wave-row"><td colspan="5">Wave 1 &middot; Foundation &middot; Days 1&ndash;3</td></tr>
         <tr class="done-row"><td class="num">1</td><td class="repro">Repro 07</td><td class="title">Loop "first item only"</td><td class="eff">~2h</td><td class="day">Day 1</td></tr>
         <tr class="done-row"><td class="num">2</td><td class="repro">Repro 03</td><td class="title">Docker persistence &amp; encryption-key drift</td><td class="eff">~3h</td><td class="day">Day 2</td></tr>
-        <tr><td class="num">3</td><td class="repro">Repro 08</td><td class="title">HTTP <code>ECONNREFUSED</code> from inside the container</td><td class="eff">~3h</td><td class="day">Day 3</td></tr>
+        <tr class="done-row"><td class="num">3</td><td class="repro">Repro 08</td><td class="title">HTTP <code>ECONNREFUSED</code> from inside the container</td><td class="eff">~3h</td><td class="day">Day 3</td></tr>
         <tr class="wave-row"><td colspan="5">Wave 2 &middot; Core JD coverage &middot; Days 4&ndash;5</td></tr>
         <tr><td class="num">4</td><td class="repro">Repro 02</td><td class="title">OAuth callback URL mismatch &amp; refresh-token expiry</td><td class="eff">~4h</td><td class="day">Day 4</td></tr>
         <tr><td class="num">5</td><td class="repro">Repro 05</td><td class="title">Webhook double-trigger from provider retries</td><td class="eff">~3h</td><td class="day">Day 5</td></tr>
@@ -203,7 +204,7 @@
 
   <div class="section-rule">02 &nbsp;/&nbsp; The 9 cards</div>
   <h2>For each repro: the problem, then the solution.</h2>
-  <p class="section-intro" style="margin-top:8px"><em>Cards 1 and 2 (Repros 07 and 03) are now done &mdash; left in place to preserve build numbering and to let the next person see the historical sequence.</em></p>
+  <p class="section-intro" style="margin-top:8px"><em>Cards 1, 2, and 3 (Repros 07, 03, and 08) are now done &mdash; left in place to preserve build numbering and to let the next person see the historical sequence. Wave 1 is complete.</em></p>
   <p class="section-intro">"Problem" is what a real customer is hitting on the forum. "Solution" is the concrete artifact this repro folder produces &mdash; what a future me, or a teammate, can clone and run on a clean machine to demonstrate the fix.</p>
 
   <div class="repros">
@@ -298,15 +299,15 @@
     </article>
 
     <!-- 3 / Repro 08 -->
-    <article class="repro">
+    <article class="repro is-done">
       <div class="id">
         <div class="ord">Build #3</div>
         <div class="num">08</div>
-        <span class="pill wave1">Wave 1 &middot; Day 3</span>
-        <span class="effort">Budget ~3h</span>
+        <span class="pill done">Done</span>
+        <span class="effort">Spent ~3h</span>
       </div>
       <div>
-        <h3>HTTP <code>ECONNREFUSED</code> from inside the container</h3>
+        <h3>HTTP <code>ECONNREFUSED</code> from inside the container <span class="done-badge">Shipped</span></h3>
         <div class="sub">Three sub-scenarios in one stack</div>
         <div class="ps">
           <div class="problem">

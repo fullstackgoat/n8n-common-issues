@@ -1,0 +1,70 @@
+{
+  "name": "Repro 08 — Scenario 3: HTTPS endpoint with a self-signed certificate",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## REPRO 08 / Scenario 3 — \"Self-signed certificate in certificate chain\"\n\nThis workflow has one HTTP Request node hitting `https://self-signed/`. The URL is **identical** between the broken and fixed stacks; only n8n's environment differs.\n\n### The target\n\n`self-signed-nginx` is an `nginx:1.27-alpine` container serving HTTPS on port 443 with a self-signed cert generated at first compose-up by the `cert-init` service. Aliases `self-signed`, `self-signed-server`, and `self-signed.local` are all valid hostnames.\n\nThis mirrors the canonical real-world setup: an internal HTTPS service, an MS SQL Server, a Vault, a corporate Jira, etc., that's been deployed with a cert from an internal CA the host's trust store doesn't know about.\n\n### Why it fails on the broken stack\n\nNode.js verifies TLS certificates against the system CA bundle. The self-signed cert isn't in any trust store n8n knows about, so the handshake aborts with:\n\n```\nError: self signed certificate\nError: unable to verify the first certificate\nError: SELF_SIGNED_CERT_IN_CHAIN\n```\n\n(Exact wording varies by Node version. All three are the same root cause.)\n\n### Why it works on the fixed stack\n\n`docker-compose.fixed.yml` mounts the same `certs` volume that `cert-init` wrote to, then sets:\n\n```yaml\nenvironment:\n  - NODE_EXTRA_CA_CERTS=/certs/server.crt\nvolumes:\n  - certs:/certs:ro\n```\n\nNode.js reads `NODE_EXTRA_CA_CERTS` at startup and adds the listed CA to its in-process trust store. From that point on, certificates signed by that CA verify successfully. **TLS verification stays on for everything else.**\n\n### What NOT to do\n\nAvoid `NODE_TLS_REJECT_UNAUTHORIZED=0`. It works — but it disables TLS verification for **every** outbound HTTPS call from the n8n process, not just the self-signed one. That's fine in dev, dangerous in prod. See `WORKAROUND.md` for the per-environment guidance.",
+        "height": 700,
+        "width": 540
+      },
+      "id": "08030000-1111-2222-3333-444455556601",
+      "name": "About this scenario",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, -260]
+    },
+    {
+      "parameters": {},
+      "id": "08030000-1111-2222-3333-444455556602",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 460]
+    },
+    {
+      "parameters": {
+        "url": "https://self-signed/",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "08030000-1111-2222-3333-444455556603",
+      "name": "GET https://self-signed/",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 460],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### What you should observe\n\n**On the broken stack (`docker-compose.yml`):**\n\n```\nError: self signed certificate\n```\n\n(or one of the other three wording variants depending on Node version)\n\n**On the fixed stack (`docker-compose.fixed.yml`):**\n\n```json\n{\n  \"server\": \"self-signed-nginx\",\n  \"tls\":    \"self-signed\",\n  \"status\": \"ok\"\n}\n```\n\n200 OK. The `X-Repro` response header confirms it really came from this container, not a transparent proxy.\n\n### Quick sanity check from outside n8n\n\nFrom your host:\n\n```bash\n# This will fail without -k because the cert isn't in your host's trust store either:\ncurl -k https://localhost:8443/    # if you publish 443:443 in compose\n```",
+        "height": 480,
+        "width": 540
+      },
+      "id": "08030000-1111-2222-3333-444455556604",
+      "name": "What to observe",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-180, 460]
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "GET https://self-signed/",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}
