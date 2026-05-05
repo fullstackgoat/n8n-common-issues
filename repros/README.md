@@ -17,7 +17,7 @@ docker compose up -d
 |:-:|---|:-:|
 | 01 | [Webhook URL & "Connection lost"](01-webhook-url/) | ✅ done |
 | 02 | [OAuth 2.0 callback failures](02-oauth-callback/) | ⏳ planned |
-| 03 | [Docker self-hosting persistence](03-docker-persistence/) | ⏳ planned |
+| 03 | [Docker self-hosting persistence](03-docker-persistence/) | ✅ done |
 | 04 | [Queue mode ghost triggers](04-queue-mode-ghost-triggers/) | ⏳ planned |
 | 05 | [Webhook double-trigger / idempotency](05-webhook-double-trigger/) | ⏳ planned |
 | 06 | [RAG vector dimension mismatch](06-rag-vector-dimensions/) | ⏳ planned |

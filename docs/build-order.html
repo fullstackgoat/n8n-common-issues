@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Build Order — The 9 Remaining Repros (Project 1)</title>
-<meta name="description" content="The exact order to build the 9 remaining reproductions inside the n8n-repro-lab. For each: the problem we're solving and the solution we're shipping." />
+<title>Build Order — The 7 Remaining Repros (Project 1)</title>
+<meta name="description" content="The exact order to build the 7 remaining reproductions inside the n8n-repro-lab. For each: the problem we're solving and the solution we're shipping." />
 <style>
   :root {
     --ink:        #1c1a17;
@@ -80,7 +80,13 @@
   .repro .id .pill.wave2 { background: var(--accent); }
   .repro .id .pill.wave3 { background: var(--ink); }
   .repro .id .pill.wave4 { background: #6b4a87; }
+  .repro .id .pill.done { background: var(--ink-faint); }
   .repro .id .effort { display: block; margin-top: 10px; font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink-faint); text-transform: uppercase; }
+  .repro.is-done .num { color: var(--ink-faint); }
+  .repro.is-done h3 { text-decoration: line-through; text-decoration-color: var(--rule); }
+  .done-badge { display: inline-block; margin-left: 10px; padding: 2px 8px; background: var(--accent-2); color: var(--paper); font-family: ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; vertical-align: middle; }
+  table.glance tr.done-row td.repro, table.glance tr.done-row td.title { color: var(--ink-faint); }
+  table.glance tr.done-row td.title::after { content: " ✓ done"; color: var(--accent-2); font-weight: 700; letter-spacing: 0.06em; }
 
   .repro h3 { font-size: 24px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.005em; }
   .repro .sub { font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 22px; }
@@ -136,9 +142,9 @@
   </div>
 
   <div class="eyebrow">Project 01 &middot; The repro lab &middot; Build queue</div>
-  <h1>9 reproductions left to ship &mdash; in exact build order.</h1>
+  <h1>7 reproductions left to ship &mdash; in exact build order.</h1>
   <p class="lede">
-    Repro 01 (Webhook URL) is done and sets the pattern. The other nine still need building.
+    Repros 01 (Webhook URL), 07 (Loops), and 03 (Docker persistence) are done. The other seven still need building.
     Below: the order to tackle them, the <strong>problem</strong> each one is solving on the customer's side, and the <strong>solution</strong> &mdash; the actual artifacts we're shipping for each.
     Order is taken straight from the <a href="../build-project1.md">daily kanban in <code>build-project1.md</code></a>; sequenced for momentum (easy first) before escalating to the production-complexity repros.
   </p>
@@ -146,11 +152,11 @@
   <div class="meta-strip">
     <div>
       <div class="meta-label">Done</div>
-      <div class="meta-value">1<span class="small">&nbsp;/&nbsp;10</span></div>
+      <div class="meta-value">3<span class="small">&nbsp;/&nbsp;10</span></div>
     </div>
     <div>
       <div class="meta-label">Remaining</div>
-      <div class="meta-value">9</div>
+      <div class="meta-value">7</div>
     </div>
     <div>
       <div class="meta-label">Build window</div>
@@ -179,8 +185,8 @@
       </thead>
       <tbody>
         <tr class="wave-row"><td colspan="5">Wave 1 &middot; Foundation &middot; Days 1&ndash;3</td></tr>
-        <tr><td class="num">1</td><td class="repro">Repro 07</td><td class="title">Loop "first item only"</td><td class="eff">~2h</td><td class="day">Day 1</td></tr>
-        <tr><td class="num">2</td><td class="repro">Repro 03</td><td class="title">Docker persistence &amp; encryption-key drift</td><td class="eff">~3h</td><td class="day">Day 2</td></tr>
+        <tr class="done-row"><td class="num">1</td><td class="repro">Repro 07</td><td class="title">Loop "first item only"</td><td class="eff">~2h</td><td class="day">Day 1</td></tr>
+        <tr class="done-row"><td class="num">2</td><td class="repro">Repro 03</td><td class="title">Docker persistence &amp; encryption-key drift</td><td class="eff">~3h</td><td class="day">Day 2</td></tr>
         <tr><td class="num">3</td><td class="repro">Repro 08</td><td class="title">HTTP <code>ECONNREFUSED</code> from inside the container</td><td class="eff">~3h</td><td class="day">Day 3</td></tr>
         <tr class="wave-row"><td colspan="5">Wave 2 &middot; Core JD coverage &middot; Days 4&ndash;5</td></tr>
         <tr><td class="num">4</td><td class="repro">Repro 02</td><td class="title">OAuth callback URL mismatch &amp; refresh-token expiry</td><td class="eff">~4h</td><td class="day">Day 4</td></tr>
@@ -197,20 +203,21 @@
 
   <div class="section-rule">02 &nbsp;/&nbsp; The 9 cards</div>
   <h2>For each repro: the problem, then the solution.</h2>
+  <p class="section-intro" style="margin-top:8px"><em>Cards 1 and 2 (Repros 07 and 03) are now done &mdash; left in place to preserve build numbering and to let the next person see the historical sequence.</em></p>
   <p class="section-intro">"Problem" is what a real customer is hitting on the forum. "Solution" is the concrete artifact this repro folder produces &mdash; what a future me, or a teammate, can clone and run on a clean machine to demonstrate the fix.</p>
 
   <div class="repros">
 
     <!-- 1 / Repro 07 -->
-    <article class="repro">
+    <article class="repro is-done">
       <div class="id">
         <div class="ord">Build #1</div>
         <div class="num">07</div>
-        <span class="pill wave1">Wave 1 &middot; Day 1</span>
-        <span class="effort">Budget ~2h</span>
+        <span class="pill done">Done</span>
+        <span class="effort">Spent ~2h</span>
       </div>
       <div>
-        <h3>Loop "first item only"</h3>
+        <h3>Loop "first item only" <span class="done-badge">Shipped</span></h3>
         <div class="sub">Repros mental-model bug &middot; Pure workflow JSON, no infra</div>
         <div class="ps">
           <div class="problem">
@@ -247,15 +254,15 @@
     </article>
 
     <!-- 2 / Repro 03 -->
-    <article class="repro">
+    <article class="repro is-done">
       <div class="id">
         <div class="ord">Build #2</div>
         <div class="num">03</div>
-        <span class="pill wave1">Wave 1 &middot; Day 2</span>
-        <span class="effort">Budget ~3h</span>
+        <span class="pill done">Done</span>
+        <span class="effort">Spent ~3h</span>
       </div>
       <div>
-        <h3>Docker persistence &amp; encryption-key drift</h3>
+        <h3>Docker persistence &amp; encryption-key drift <span class="done-badge">Shipped</span></h3>
         <div class="sub">Two compose files &middot; Broken vs fixed</div>
         <div class="ps">
           <div class="problem">

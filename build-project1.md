@@ -12,7 +12,7 @@
 |:-:|---|:-:|---|
 | 01 | [Webhook URL & "Connection lost"](repros/01-webhook-url/) | ✅ done | Full reference. Pattern-setter for the rest. |
 | 02 | [OAuth callback failures](repros/02-oauth-callback/) | ⏳ todo | Wave 2 |
-| 03 | [Docker persistence](repros/03-docker-persistence/) | ⏳ todo | Wave 1 |
+| 03 | [Docker persistence](repros/03-docker-persistence/) | ✅ done | Wave 1 — broken vs fixed compose stacks + full SQLite → Postgres migration in WORKAROUND. |
 | 04 | [Queue mode ghost triggers](repros/04-queue-mode-ghost-triggers/) | ⏳ todo | Wave 3 — hardest |
 | 05 | [Webhook double trigger](repros/05-webhook-double-trigger/) | ⏳ todo | Wave 2 |
 | 06 | [RAG vector dimensions](repros/06-rag-vector-dimensions/) | ⏳ todo | Wave 4 |
@@ -21,9 +21,9 @@
 | 09 | [Memory overflow](repros/09-memory-overflow-large-sql/) | ⏳ todo | Wave 3 |
 | 10 | [Node regression — Snowflake](repros/10-node-regression-snowflake/) | ⏳ todo | Wave 4 |
 
-**Done count:** 2 / 10
+**Done count:** 3 / 10
 **Target completion:** Day 7 of the 14-day sprint
-**Cumulative effort burned:** ~5h on Repro 01 + ~2h on Repro 07 = ~7h
+**Cumulative effort burned:** ~5h on Repro 01 + ~2h on Repro 07 + ~3h on Repro 03 = ~10h
 
 ---
 
@@ -526,8 +526,8 @@ Check off as you ship. Each row = one work session.
 - [x] **Evening:** Cross-link from `kb/07-loops.md` (stub the KB if needed) — full KB article shipped, not a stub
 
 ### Day 2
-- [ ] **AM:** Repro 03 — both compose files, .env.example
-- [ ] **PM:** Repro 03 — REPRO, ROOT_CAUSE, WORKAROUND, smoke test
+- [x] **AM:** Repro 03 — both compose files, .env.example
+- [x] **PM:** Repro 03 — REPRO, ROOT_CAUSE, WORKAROUND, smoke test
 - [ ] **Evening:** Repro 08 scaffolding (just folder + README)
 
 ### Day 3
@@ -584,4 +584,5 @@ At that point, this file (`build-project1.md`) can be moved to `_archive/` or de
 
 - _2026-05-01:_ Repro 01 (webhook URL) shipped. ~5h. Pattern feels right; copying it for the rest.
 - _2026-05-04:_ Repro 07 (loops & "N keys" error) shipped. ~2h. Workflow-only repro — three importable JSONs (broken-loop, fixed-loop, three-keys-error) + full docs + KB article. Pattern from Repro 01 ports cleanly; the workflow-JSON-with-sticky-notes format works well for forum-style bugs that don't need a docker stack to reproduce. Also confirmed the ~2h budget is realistic when the bug is purely in workflow design.
+- _2026-05-04:_ Repro 03 (docker persistence) shipped. ~3h. Broken stack reproduces data loss in two commands (no volume + no encryption key + no healthcheck); fixed stack adds named volume, pinned `N8N_ENCRYPTION_KEY`, healthcheck, and explicit `user: "1000:1000"`. WORKAROUND.md covers the full SQLite → Postgres migration with the official `n8n export:credentials/workflow` CLI commands, plus per-platform notes (Linux / macOS / NAS / k8s). KB stub stays planned (Project 2). All three symptoms are deterministic — no flaky timing, no platform-specific gotchas in the core repro path. **Smoke-test passed end-to-end on Docker 29.4.1 / Compose v5.1.3:** broken stack → create owner+credential at `localhost:5678` → `docker compose down && up` → owner-setup screen returns (data gone, confirmed). Fixed stack → create owner+credential → `docker compose down && up` → owner account preserved, credential `repro-credential` still present and decryptable. Bonus evidence: broken stack `docker compose ps` shows `Up Xs` with no health column; fixed stack transitions `(health: starting)` → `(healthy)` at ~35s. Named volume `n8n-repro-03-docker-persistence-fixed_n8n_data` survives `down`, removed by `down -v`. All three symptoms reproduce 100%; all three fixes verified.
 - _<date>:_ ...

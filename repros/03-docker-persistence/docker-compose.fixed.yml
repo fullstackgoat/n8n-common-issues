@@ -1,0 +1,47 @@
+name: n8n-repro-03-docker-persistence-fixed
+
+# The minimum-viable persistent n8n stack. Everything the broken stack is
+# missing, in one file:
+#
+#   1. Named volume `n8n_data` on /home/node/.n8n.
+#   2. N8N_ENCRYPTION_KEY pinned via env var — survives volume rebuilds
+#      and lets you restore from backup onto a new host.
+#   3. Healthcheck against /healthz so `docker compose ps` tells the truth.
+#   4. Explicit `user: "1000:1000"` so file UID/GID matches typical Linux
+#      hosts and bind-mounts (no EACCES on workflow file writes).
+#
+# This stack still uses SQLite — fine for a single-instance dev / small
+# production. For multi-worker queue mode or any concurrent workload, see
+# WORKAROUND.md "Step 5 — Migrate SQLite → Postgres".
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    user: "1000:1000"
+    ports:
+      - "${PUBLIC_PORT:-5678}:5678"
+    environment:
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}
+      - N8N_DIAGNOSTICS_ENABLED=${N8N_DIAGNOSTICS_ENABLED}
+      # --- THE FIX, part 1: pin the encryption key. ---
+      # If you change this value, every existing credential becomes unreadable.
+      # Back it up alongside your volume snapshots.
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    volumes:
+      # --- THE FIX, part 2: named volume for /home/node/.n8n. ---
+      # Survives `docker compose down`. Wiped only by `docker compose down -v`.
+      - n8n_data:/home/node/.n8n
+    healthcheck:
+      # --- THE FIX, part 3: real healthcheck. ---
+      # n8n exposes /healthz on the same port as the editor.
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  n8n_data:

@@ -1,0 +1,34 @@
+name: n8n-repro-03-docker-persistence-broken
+
+# This stack reproduces the most common n8n self-hosting catastrophe:
+# data loss after a routine `docker compose down`. Three things are
+# DELIBERATELY MISSING:
+#
+#   1. No volume mount.        → /home/node/.n8n lives in the container's
+#                                writable layer. Removed with the container.
+#   2. No N8N_ENCRYPTION_KEY.  → n8n auto-generates one and stores it
+#                                inside the (non-existent) volume. Even if
+#                                a volume existed later, credentials would
+#                                be unreadable.
+#   3. No healthcheck.         → Compose reports the service as "running"
+#                                even when the editor is broken. Watchdogs,
+#                                load balancers, and CI scripts all lie.
+#
+# See docker-compose.fixed.yml for the corrected version.
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "${PUBLIC_PORT:-5678}:5678"
+    environment:
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}
+      - N8N_DIAGNOSTICS_ENABLED=${N8N_DIAGNOSTICS_ENABLED}
+      # NOTE: N8N_ENCRYPTION_KEY deliberately UNSET. n8n will auto-generate
+      # one on first boot and store it in /home/node/.n8n/config — which we
+      # don't persist either. See docker-compose.fixed.yml.
+    # NOTE: no `volumes:` block. Data does not survive `docker compose down`.
+    # NOTE: no `healthcheck:`. Compose reports "running" even when broken.
